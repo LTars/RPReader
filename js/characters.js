@@ -2,6 +2,9 @@
 // Загружает index.json, подгружает файлы персонажей по требованию.
 // Управляет tooltip и панелью.
 
+const BASE_URL = new URL('../', import.meta.url).href;
+const CHAR_INDEX_URL = BASE_URL + 'data/characters/index.json';
+
 export class Characters {
   constructor() {
     this.index   = [];      // [{id, names, file}]
@@ -25,7 +28,7 @@ export class Characters {
   }
 
   // ── load ─────────────────────────────────────────────
-  async load(indexUrl = 'data/characters/index.json') {
+  async load(indexUrl = CHAR_INDEX_URL) {
 	console.log('Characters.load url:', indexUrl);
     const resp = await fetch(indexUrl);
     if (!resp.ok) throw new Error(`Characters index load failed: ${resp.status}`);
@@ -149,7 +152,7 @@ export class Characters {
     const entry = this.index.find(c => c.id === id);
     if (!entry) return null;
     try {
-      const resp = await fetch('./' + entry.file);
+      const resp = await fetch(BASE_URL + entry.file);
       if (!resp.ok) return null;
       const data = await resp.json();
       this.cache[id] = data;

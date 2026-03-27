@@ -4,6 +4,9 @@
 // Block: { type, authorId, side, datetime, content, anchor }
 // type: 'message' | 'divider' | 'empty'
 
+const BASE_URL = new URL('../', import.meta.url).href;
+const PARSER_RULES_URL = BASE_URL + 'data/parser-rules.json';
+
 export class Parser {
   constructor(rules) {
     this.rules    = rules;
@@ -148,7 +151,7 @@ export class Parser {
 }
 
 // ── static loader ────────────────────────────────────────
-export async function loadParser(rulesUrl = 'data/parser-rules.json') {
+export async function loadParser(rulesUrl = PARSER_RULES_URL) {
   const resp = await fetch(rulesUrl);
   if (!resp.ok) throw new Error(`Failed to load parser rules: ${resp.status}`);
   const rules = await resp.json();

@@ -2,6 +2,10 @@ import { loadParser } from './parser.js';
 import { Characters }  from './characters.js';
 import { Search }      from './search.js';
 
+const BASE_URL = new URL('../', import.meta.url).href;
+const CONTENT_URL = BASE_URL + 'content/main.md';
+const PARSER_RULES_URL = BASE_URL + 'data/parser-rules.json';
+
 // ── Reader ───────────────────────────────────────────────
 class Reader {
   constructor() {
@@ -25,11 +29,11 @@ class Reader {
 
   // ── load & parse ─────────────────────────────────────
   async _loadParser() {
-    this.parser = await loadParser('../data/parser-rules.json');
+    this.parser = await loadParser(PARSER_RULES_URL);
   }
 
   async _loadContent() {
-    const resp = await fetch('../content/main.md');
+    const resp = await fetch(CONTENT_URL);
     if (!resp.ok) throw new Error('Content load failed');
     const raw = await resp.text();
     this.blocks = this.parser.parse(raw);
