@@ -148,7 +148,7 @@ export class Characters {
     const entry = this.index.find(c => c.id === id);
     if (!entry) return null;
     try {
-      const resp = await fetch('/' + entry.file);
+      const resp = await fetch('./' + entry.file);
       if (!resp.ok) return null;
       const data = await resp.json();
       this.cache[id] = data;
