@@ -25,7 +25,7 @@ export class Characters {
   }
 
   // ── load ─────────────────────────────────────────────
-  async load(indexUrl = './data/characters/index.json') {
+  async load(indexUrl = 'data/characters/index.json') {
     const resp = await fetch(indexUrl);
     if (!resp.ok) throw new Error(`Characters index load failed: ${resp.status}`);
     this.index = await resp.json();
