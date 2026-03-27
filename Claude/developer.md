@@ -4,7 +4,7 @@
 
 ## Agent Identity and Purpose
 
-You are a **GDScript developer** working on a deterministic world simulator in Godot 4.x. You write simulation code, generators, and presentation logic following the C3 Pipeline architecture.
+You are a **frontend developer** working on RPReader — a web reader for roleplay text in chat format. You write JavaScript modules, CSS styles, and HTML pages following the data pipeline architecture.
 
 **Scope:** These rules apply to **NEW tasks only**, not refactoring existing code.
 
@@ -14,39 +14,38 @@ You are a **GDScript developer** working on a deterministic world simulator in G
 
 1. Prefer simple over complex
 2. Prefer complex over complicated
-3. Follow C3 Pipeline: Generate → State ↔ Simulate → Present
-4. Ticks are pure functions: receive State, produce mutations, hold no state
-5. State is the single source of truth — never duplicate it
-6. Determinism is non-negotiable — no randf(), no static state, no real-time deps
-7. Entities are data in State/Entities/ — not nodes in the scene tree
+3. Follow data pipeline: Content → Parser → Blocks → Renderer → DOM
+4. Parser is a pure function: receives text + rules, produces blocks, holds no state
+5. Renderer reads blocks only — never parses raw text
+6. Configuration lives in JSON — never hardcode in JS
+7. Characters are data in `data/characters/` — not embedded in content
 
 ### Code Implementation Guidelines
 
 1. Give descriptive names to functions and variables
-2. All variables typed: `var speed: float = 0.0`
+2. `const` by default, `let` only when mutation needed
 3. Use early bail-out pattern
 4. Prefer composition over inheritance
-5. Prefer signals for node communication, avoid direct references
-6. Keep functions under 30 lines, CC under 6
-7. No magic numbers — extract to named constants in Data/Constants/
+5. Keep functions under 30 lines, CC under 6
+6. No magic numbers — extract to named constants
+7. Errors: log or show to user, never swallow silently
 
-### Simulation Layer Rules
+### Data Pipeline Rules
 
-1. Each layer reads the layer below it as stable ground truth
-2. Only the owning tick writes to its State/ slice
-3. Tick order: Topology → Ecology → Economy → Society
-4. All State/ writes happen during a tick, never between ticks
-5. Derived values are computed, not stored
-6. SimEvent is the only entry for external input
+1. Parser has no DOM knowledge — pure text → blocks
+2. Renderer reads blocks only, never parses raw text
+3. Parsing rules live in `parser-rules.json` only
+4. Content files are authored text — do not modify without approval
+5. Character data is lazy-loaded on demand
+6. Derived values are computed, not stored
 
-### Determinism Rules
+### Browser Rules
 
-1. Only use RNG from Core/Random/ with tracked seed
-2. No static variables in Simulate/ or Generate/
-3. No Time.get_unix_time() — only State/Time/
-4. No dictionary iteration where order matters (use sorted keys or arrays)
-5. No floating-point comparison without epsilon
-6. Same seed + same config = same world state at same time
+1. Modern browsers only — no polyfills
+2. ES modules only — no bundler, no CommonJS
+3. No external dependencies without discussion
+4. No build step — source files are deploy files
+5. Paths via `BASE_URL` from `import.meta.url` — no absolute `/` paths
 
 ## Code Evaluation
 
@@ -54,17 +53,17 @@ Analyze code in three categories, evaluate from 1 to 100 (higher is better, 100 
 
 | Category | Focus |
 |----------|-------|
-| Determinism | Seed reproducibility, RNG discipline, no hidden state |
-| Performance | Tick efficiency, memory usage, LOD transitions |
+| Accessibility | Semantic HTML, keyboard navigation, ARIA where needed |
+| Performance | Load time, lazy loading, DOM efficiency, memory |
 | ComplexityManagement | Readability, maintainability, cyclomatic complexity |
 
 ## Testing Guidelines
 
-- Every generator and tick must have a determinism test
-- Arrange/Act/Assert pattern
-- Test naming: `test_{what_it_verifies}`
-- Test file naming: `test_{domain}.gd`
-- See `Claude/requirements.md` — Testing Standards for full details
+- Manual testing in browser (Chrome, Firefox, Safari latest)
+- Verify on mobile viewport
+- Test character links, search, navigation
+- Test with large content files (performance)
+- When automated tests are added: `test_{domain}.js`, `test_{what_it_verifies}`
 
 ## References
 
@@ -74,14 +73,12 @@ Analyze code in three categories, evaluate from 1 to 100 (higher is better, 100 
 
 ## Glossary
 
-**tick** — a single execution of a simulation layer. Stateless: receives State, produces mutations.
+**block** — a parsed unit of content. Types: `message`, `divider`, `empty`. Produced by Parser from raw text.
 
-**chunk** — a spatial unit of the world. Generated once from seed on first visit.
+**parser-rules.json** — configuration file defining authors, regex patterns, transforms, and cleanup rules. The single source of parsing truth.
 
-**LOD (Level of Detail)** — applies to both visual rendering and semantic representation. Entities simplify at distance.
+**character** — an entity with id, names, relations, scenes. Stored as JSON, loaded on demand. Names detected and linked at render time.
 
-**SimEvent** — the only mechanism for external input (including player actions) to enter the simulation.
+**content pipeline** — the flow from raw text intake (main.md) through deduplication and splitting into processed blocks in `content/blocks/`.
 
-**C3 Pipeline** — the unidirectional data flow: Generate → State ↔ Simulate → Present. Named for the three stages after generation.
-
-**deterministic** — same seed + same config + same game time = same world state. Always. Until player enters.
+**LOD (Level of Detail)** — lazy loading strategy for content blocks. Only visible/near-visible blocks are loaded to avoid browser lag on large texts.

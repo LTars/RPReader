@@ -5,21 +5,27 @@
 const BASE_URL = new URL('../', import.meta.url).href;
 const CHAR_INDEX_URL = BASE_URL + 'data/characters/index.json';
 
+const PANEL_LINK_LABEL = 'Страница персонажа';
+const ALIASES_PREFIX   = 'также: ';
+
 export class Characters {
   constructor() {
     this.index   = [];      // [{id, names, file}]
     this.cache   = {};      // id → full character data
     this.nameMap = {};      // lowercase name → id
-    this._tooltipTimer = null;
+    this._tooltipTimer  = null;
     this._activeTooltip = null;
-    this._lastVisited = null;
+    this._lastVisited   = null;
 
-    this._tooltip = document.getElementById('char-tooltip');
-    this._panel   = document.getElementById('char-panel');
-    this._panelName = document.getElementById('char-panel-name');
+    this._tooltip      = document.getElementById('char-tooltip');
+    this._panel        = document.getElementById('char-panel');
+    this._panelName    = document.getElementById('char-panel-name');
     this._panelAliases = document.getElementById('char-panel-aliases');
-    this._panelLink = document.getElementById('char-panel-link');
-    this._panelClose = document.getElementById('char-panel-close');
+    this._panelLink    = document.getElementById('char-panel-link');
+    this._panelClose   = document.getElementById('char-panel-close');
+
+    const linkLabel = document.getElementById('char-panel-link-label');
+    if (linkLabel) linkLabel.textContent = PANEL_LINK_LABEL;
 
     this._panelClose?.addEventListener('click', () => this.closePanel());
     document.addEventListener('keydown', e => {
@@ -29,7 +35,6 @@ export class Characters {
 
   // ── load ─────────────────────────────────────────────
   async load(indexUrl = CHAR_INDEX_URL) {
-	console.log('Characters.load url:', indexUrl);
     const resp = await fetch(indexUrl);
     if (!resp.ok) throw new Error(`Characters index load failed: ${resp.status}`);
     this.index = await resp.json();
@@ -41,12 +46,11 @@ export class Characters {
     }
   }
 
-  // ── wrap character names in text node ────────────────
+  // ── wrap character names in text ─────────────────────
   // Returns HTML string with <span class="char-link"> around known names
   wrapNames(text) {
     if (!text) return text;
 
-    // build sorted names longest-first to avoid partial matches
     const names = Object.keys(this.nameMap).sort((a, b) => b.length - a.length);
     if (!names.length) return text;
 
@@ -81,9 +85,7 @@ export class Characters {
 
   _onHoverEnd() {
     clearTimeout(this._tooltipTimer);
-    if (this._tooltip) {
-      this._tooltip.classList.remove('show');
-    }
+    this._tooltip?.classList.remove('show');
   }
 
   _showTooltip(id, e) {
@@ -95,7 +97,6 @@ export class Characters {
     this._tooltip.querySelector('.tooltip-aliases').textContent =
       aliases.length ? aliases.join(' · ') : '';
 
-    // position near cursor
     const x = Math.min(e.clientX + 12, window.innerWidth - 260);
     const y = Math.min(e.clientY + 16, window.innerHeight - 100);
     this._tooltip.style.left = x + 'px';
@@ -112,7 +113,6 @@ export class Characters {
 
     this._lastVisited = e.currentTarget;
     e.currentTarget.classList.add('visited');
-
     this._openPanel(char);
   }
 
@@ -122,16 +122,15 @@ export class Characters {
 
     this._panelName.textContent = primary;
     this._panelAliases.textContent = aliases.length
-      ? 'также: ' + aliases.join(', ')
+      ? ALIASES_PREFIX + aliases.join(', ')
       : '';
-    this._panelLink.href = `../character.html?id=${char.id}`;
+    this._panelLink.href = BASE_URL + `character.html?id=${char.id}`;
 
     this._panel.classList.add('open');
   }
 
   closePanel() {
     this._panel?.classList.remove('open');
-    // highlight the link we came from
     if (this._lastVisited) {
       this._highlightElement(this._lastVisited);
       this._lastVisited = null;
@@ -140,7 +139,7 @@ export class Characters {
 
   _highlightElement(el) {
     el.classList.remove('highlighted');
-    void el.offsetWidth; // reflow to restart animation
+    void el.offsetWidth;
     el.classList.add('highlighted');
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(() => el.classList.remove('highlighted'), 2200);
@@ -157,6 +156,9 @@ export class Characters {
       const data = await resp.json();
       this.cache[id] = data;
       return data;
-    } catch { return null; }
+    } catch (err) {
+      console.error('Character load failed:', err);
+      return null;
+    }
   }
 }

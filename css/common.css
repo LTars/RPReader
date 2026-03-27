@@ -1,0 +1,56 @@
+:root {
+  --bg:             #1a1a1f;
+  --bg-elevated:    #212128;
+  --surface:        #2a2a35;
+  --surface-hover:  #303040;
+  --border:         #3a3a48;
+  --border-subtle:  #2e2e3a;
+  --text:           #e8e8f0;
+  --text-dim:       #9090a8;
+  --text-muted:     #55556a;
+  --accent:         #c084fc;
+  --accent-dim:     #9333ea;
+  --accent-glow:    rgba(192, 132, 252, 0.15);
+  --author-right:   #c084fc;
+  --author-left:    #67e8f9;
+  --bubble-right:   #2d2040;
+  --bubble-left:    #1a2d35;
+  --panel-width:    48px;
+  --panel-expanded: 220px;
+  --radius:         12px;
+  --radius-sm:      6px;
+  --radius-bubble:  18px;
+  --font-body:      'Lora', Georgia, serif;
+  --font-ui:        'DM Sans', system-ui, sans-serif;
+  --font-mono:      'JetBrains Mono', monospace;
+  --transition:     0.18s ease;
+}
+
+[data-blue-filter="on"] {
+  filter: sepia(20%) saturate(0.9);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}

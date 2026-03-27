@@ -6,6 +6,14 @@ const BASE_URL = new URL('../', import.meta.url).href;
 const CONTENT_URL = BASE_URL + 'content/main.md';
 const PARSER_RULES_URL = BASE_URL + 'data/parser-rules.json';
 
+const UI = {
+  MENU_TITLE:         'Меню',
+  SEARCH_TITLE:       'Поиск (⌘K)',
+  BLUE_FILTER_TITLE:  'Фильтр синего света',
+  SEARCH_PLACEHOLDER: 'Поиск по тексту...',
+  UNKNOWN_AUTHOR:     '—',
+};
+
 // ── Reader ───────────────────────────────────────────────
 class Reader {
   constructor() {
@@ -13,6 +21,9 @@ class Reader {
     this.characters = new Characters();
     this.search     = null;
     this.blocks     = [];
+
+    this._progressFill = document.getElementById('progress-fill');
+    this._progressText = document.getElementById('progress-text');
   }
 
   async init() {
@@ -67,10 +78,7 @@ class Reader {
       lastSide     = block.side;
     }
 
-    // bind character link events after render
     this.characters.bindLinks(chat);
-
-    // init search with blocks
     this.search = new Search(this.blocks);
   }
 
@@ -80,7 +88,7 @@ class Reader {
 
     const authorName = block.authorId
       ? (this.parser.authors.find(a => a.id === block.authorId)?.names[0] || block.authorId)
-      : '—';
+      : UI.UNKNOWN_AUTHOR;
 
     div.innerHTML = `
       <span class="author-name">${authorName}</span>
@@ -101,20 +109,14 @@ class Reader {
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
 
-    // process content: wrap character names, handle dialogue lines
     const lines = block.content.split('\n');
     const processedLines = lines.map(line => {
       const trimmed = line.trim();
       if (!trimmed) return '';
 
-      // dialogue line
-      if (/^[-–—]/.test(trimmed)) {
-        const wrapped = this.characters.wrapNames(trimmed);
-        return `<p class="dialogue">${wrapped}</p>`;
-      }
-
       const wrapped = this.characters.wrapNames(trimmed);
-      return `<p>${wrapped}</p>`;
+      const cls = /^[-–—]/.test(trimmed) ? ' class="dialogue"' : '';
+      return `<p${cls}>${wrapped}</p>`;
     });
 
     bubble.innerHTML = processedLines.filter(Boolean).join('');
@@ -133,28 +135,32 @@ class Reader {
 
   // ── UI bindings ──────────────────────────────────────
   _bindUI() {
-    // panel toggle
     const panelToggle = document.getElementById('panel-toggle');
     const panel = document.querySelector('.panel');
+    const searchBtn = document.getElementById('search-btn');
+    const blueFilterBtn = document.getElementById('blue-filter-btn');
+    const searchInput = document.getElementById('search-input');
+
+    if (panelToggle) panelToggle.title = UI.MENU_TITLE;
+    if (searchBtn) searchBtn.title = UI.SEARCH_TITLE;
+    if (blueFilterBtn) blueFilterBtn.title = UI.BLUE_FILTER_TITLE;
+    if (searchInput) searchInput.placeholder = UI.SEARCH_PLACEHOLDER;
+
     panelToggle?.addEventListener('click', () => {
       panel?.classList.toggle('expanded');
     });
 
-    // search button
-    document.getElementById('search-btn')?.addEventListener('click', () => {
+    searchBtn?.addEventListener('click', () => {
       this.search?.open();
     });
 
-    // blue light toggle
-    document.getElementById('blue-filter-btn')?.addEventListener('click', () => {
+    blueFilterBtn?.addEventListener('click', () => {
       const current = document.documentElement.dataset.blueFilter;
       document.documentElement.dataset.blueFilter = current === 'on' ? 'off' : 'on';
     });
 
-    // scroll → progress
     window.addEventListener('scroll', () => this._updateProgress(), { passive: true });
 
-    // battery
     this._initBattery();
   }
 
@@ -163,11 +169,8 @@ class Reader {
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
     const pct = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
 
-    const fill = document.getElementById('progress-fill');
-    if (fill) fill.style.width = pct + '%';
-
-    const progressText = document.getElementById('progress-text');
-    if (progressText) progressText.textContent = `${pct}%`;
+    if (this._progressFill) this._progressFill.style.width = pct + '%';
+    if (this._progressText) this._progressText.textContent = `${pct}%`;
   }
 
   async _initBattery() {
@@ -176,12 +179,13 @@ class Reader {
     try {
       const bat = await navigator.getBattery();
       const update = () => {
-        const pct = Math.round(bat.level * 100);
-        el.textContent = `${pct}%`;
+        el.textContent = `${Math.round(bat.level * 100)}%`;
       };
       update();
       bat.addEventListener('levelchange', update);
-    } catch { /* not available */ }
+    } catch {
+      // Battery API not available — element stays empty
+    }
   }
 }
 

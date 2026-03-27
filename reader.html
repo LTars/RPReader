@@ -7,7 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/reader.css">
 </head>
 <body>
 <div class="app">
@@ -19,7 +20,7 @@
 
   <!-- left panel -->
   <nav class="panel" id="panel">
-    <button class="panel-icon" id="panel-toggle" title="Меню">
+    <button class="panel-icon" id="panel-toggle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <line x1="3" y1="6" x2="21" y2="6"/>
         <line x1="3" y1="12" x2="21" y2="12"/>
@@ -27,14 +28,14 @@
       </svg>
     </button>
 
-    <button class="panel-icon" id="search-btn" title="Поиск (⌘K)">
+    <button class="panel-icon" id="search-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="11" cy="11" r="7"/>
         <line x1="16.5" y1="16.5" x2="22" y2="22"/>
       </svg>
     </button>
 
-    <button class="panel-icon" id="blue-filter-btn" title="Фильтр синего">
+    <button class="panel-icon" id="blue-filter-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="12" cy="12" r="5"/>
         <line x1="12" y1="2" x2="12" y2="4"/>
@@ -77,7 +78,7 @@
           <polyline points="15 3 21 3 21 9"/>
           <line x1="10" y1="14" x2="21" y2="3"/>
         </svg>
-        Страница персонажа
+        <span id="char-panel-link-label"></span>
       </a>
     </div>
   </aside>
@@ -85,7 +86,7 @@
   <!-- search overlay -->
   <div class="search-overlay" id="search-overlay">
     <div class="search-box">
-      <input type="text" id="search-input" placeholder="Поиск по тексту...">
+      <input type="text" id="search-input">
       <div class="search-results" id="search-results"></div>
     </div>
   </div>
@@ -93,11 +94,11 @@
   <!-- status bar -->
   <div class="status-bar">
     <div class="status-item">
-      <span id="progress-text">0%</span>
+      <span id="progress-text"></span>
     </div>
     <div class="status-item">
       <span class="battery-icon">⚡</span>
-      <span id="battery-text">—</span>
+      <span id="battery-text"></span>
     </div>
   </div>
 

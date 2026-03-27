@@ -1,4 +1,4 @@
-# Claude Requirements for Forever World
+# Claude Requirements for RPReader
 
 ## MANDATORY CONTEXT
 Before starting ANY work, verify these files are loaded:
@@ -42,31 +42,31 @@ B) {option} - {tradeoff}
 
 **Violation examples**:
 
-❌ Design violation:
+Bad — Design:
 ```
-Topology generation will probably use Perlin noise for heightmaps.
-```
-
-❌ Plan violation:
-```
-Step 3: Implement economy tick (details TBD)
+The parser will probably use regex for author detection.
 ```
 
-❌ Code violation:
-```gdscript
-# TODO: replace with real RNG
-var height: float = randf()
+Bad — Plan:
+```
+Step 3: Implement character panel (details TBD)
 ```
 
-✅ Correct behavior:
+Bad — Code:
+```js
+// TODO: replace with real loading
+const blocks = [];
 ```
-[I don't know] Which noise algorithm to use for heightmap generation.
 
-Context: Cannot implement TopologyProvider without this.
-Question: Perlin, Simplex, or OpenSimplex2? Each has different artifact patterns.
+Good:
+```
+[I don't know] How to split content into blocks for LOD loading.
+
+Context: Cannot implement lazy loading without a splitting strategy.
+Question: Split by scene dividers, by block count, or by byte size?
 Options:
-A) OpenSimplex2 — fewer directional artifacts, built into Godot (FastNoiseLite)
-B) Perlin — classic, well-documented, but grid-aligned artifacts
+A) Scene dividers — natural breaks, variable size
+B) Fixed block count — predictable, may split mid-scene
 ```
 
 ---
@@ -91,8 +91,8 @@ MISSING INFORMATION:
 ```
 SCOPE AMBIGUITY: {what's ambiguous}
 
-Interpretation A: {description} → {implications}
-Interpretation B: {description} → {implications}
+Interpretation A: {description} -> {implications}
+Interpretation B: {description} -> {implications}
 
 Which interpretation should I follow?
 ```
@@ -117,10 +117,9 @@ Which takes precedence?
 
 ## Communication
 1. **No hallucination**: Never guess or fabricate. Use STOP: Uncertainty protocol above.
-2. **Ask early**: Request missing information before starting work. Use STOP: Missing Information protocol.
+2. **Ask early**: Request missing information before starting work.
 3. **One question at a time**: Ask questions step by step. Wait for the answer before asking the next.
 4. **Data boundaries**: Do not fetch files I haven't explicitly pointed to.
-   - Use the file as an entrypoint and include all files referenced programmatically or in text.
 
 ### Communication Protocol
 
@@ -176,12 +175,11 @@ DELIVERY CHECKLIST:
 
 ### Design Checklist (in addition to Universal)
 ```
-- [ ] All components have defined responsibilities (≤3 each)
+- [ ] All components have defined responsibilities (<=3 each)
 - [ ] All interfaces fully specified (no TBD)
 - [ ] All decisions have documented rationale
-- [ ] Data flow respects C3 Pipeline (Generate → State ↔ Simulate → Present)
-- [ ] No reverse data flow (Present never writes to State)
-- [ ] Determinism preserved (no randf(), no static state, no real-time dependencies)
+- [ ] Data flow respects pipeline (Content -> Parser -> Blocks -> Renderer -> DOM)
+- [ ] No reverse data flow (Renderer never modifies blocks or content)
 ```
 
 ### Plan Checklist (in addition to Universal)
@@ -195,11 +193,13 @@ DELIVERY CHECKLIST:
 ```
 - [ ] No TODO/FIXME comments
 - [ ] No stub implementations
-- [ ] No randf() or Time.get_unix_time() — only RNG from Core/Random/ and State/Time/
-- [ ] All variables typed
-- [ ] No static variables in Simulate/ or Generate/
-- [ ] Compiles without warnings
-- [ ] Tick functions hold no state between calls
+- [ ] No inline styles or scripts in HTML
+- [ ] No hardcoded paths — use BASE_URL
+- [ ] No silently swallowed errors
+- [ ] Modern browser APIs only — no polyfills
+- [ ] CSS values in custom properties
+- [ ] File assembly order followed (imports -> constants -> state -> functions -> init)
+- [ ] Runs without console errors or warnings
 ```
 
 **Checklist failure action**:
@@ -214,46 +214,35 @@ How should I proceed?
 
 ## Orchestrating Sub-Agents
 - **Delegate via sub-agents**: Use sub-agents for parallelizable work. Focus on orchestration and critical decisions.
-- **Always announce sub-agent**: Before delegating, always state the sub-agent name. Format: "Delegating to **{agent-name}** sub-agent: {brief task description}"
-- **Sub-agent requirements**: Every sub-agent should follow [Problem-Solving](#problem-solving) and [Communication](#communication) sections.
+- **Always announce sub-agent**: Before delegating, state the sub-agent name. Format: "Delegating to **{agent-name}** sub-agent: {brief task description}"
+- **Sub-agent requirements**: Every sub-agent follows Problem-Solving and Communication sections.
 - **Forward questions**: If a sub-agent has a question, forward it to me and pass back an answer.
-- **One question at a time**: Sub-agents must ask questions step by step. Wait for the answer, then ask follow-up if needed.
+- **One question at a time**: Sub-agents ask questions step by step. Wait for the answer before asking the next.
 - **Verify output**: Verify sub-agent output against CHECKPOINTS before accepting.
 
 ---
 
 ## Problem-Solving
 1. **Simple over complex**: Choose the straightforward solution.
-   - Avoid defining variables used in a single place; inject values directly.
-   - Use inline lambdas for simple one-off operations.
-   ```gdscript
-   # complex:
-   var multiplier: float = 2.0
-   var result: float = amount * multiplier
+   ```js
+   // complex:
+   const multiplier = 2.0;
+   const result = amount * multiplier;
 
-   # simple:
-   var result: float = amount * 2.0
-   ```
-   ```gdscript
-   # complex:
-   func _double(x: float) -> float:
-       return x * 2.0
-   var results: Array = values.map(_double)
-
-   # simple:
-   var results: Array = values.map(func(x: float) -> float: return x * 2.0)
+   // simple:
+   const result = amount * 2.0;
    ```
 
-2. **Complex over complicated**: When complexity is needed, keep it structured — not convoluted.
-   - Adopt early bail-out to handle simple cases first and return.
-   - Focus functions on a single responsibility. Keep them small.
-   - Use Cyclomatic Complexity (CC) for evaluation:
+2. **Complex over complicated**: When complexity is needed, keep it structured.
+   - Early bail-out for simple cases
+   - Functions focused on single responsibility
+   - Cyclomatic Complexity:
 
    | CC Score | Level | Action |
    |----------|-------|--------|
    | 1-6 | Low | Acceptable |
    | 7-12 | Complex | Review for simplification |
-   | 13+ | High | Refactor unless necessary; add descriptive comment explaining necessity |
+   | 13+ | High | Refactor unless necessary; add comment explaining |
 
 3. **Scope confirmation**: Confirm scope before starting each workflow phase.
 
@@ -261,17 +250,18 @@ How should I proceed?
 
 | Metric | Target | Exceeded Action |
 |--------|--------|-----------------|
-| Cyclomatic Complexity | ≤ 6 | Refactor or justify with comment |
-| Function length | ≤ 30 lines | Split responsibilities |
-| Nesting depth | ≤ 3 levels | Use early bail-out |
-| Component responsibilities | ≤ 3 | Split component |
+| Cyclomatic Complexity | <= 6 | Refactor or justify with comment |
+| Function length | <= 30 lines | Split responsibilities |
+| Nesting depth | <= 3 levels | Use early bail-out |
+| Component responsibilities | <= 3 | Split component |
 
 ---
 
 ## Technology Stack
-- **Engine**: Godot 4.x
-- **Language**: GDScript
-- **Testing**: GUT (Godot Unit Testing)
+- **Language**: JavaScript (ES modules)
+- **Styles**: Plain CSS (native nesting, custom properties)
+- **Markup**: HTML5
+- **Deploy**: GitHub Pages (direct from main branch)
 - **Version Control**: Git
 - **Code Style**: See `CLAUDE.md` — Code Style section
 
@@ -280,94 +270,25 @@ How should I proceed?
 ## Coding Standards
 
 Defined in `CLAUDE.md`. Key points:
-- snake_case variables/functions, PascalCase classes/nodes, UPPER_SNAKE_CASE constants
-- All variables typed
-- Signals past tense: `health_changed`, `player_died`
-- Booleans state a fact: `is_flooded`, `has_river`
-- No magic numbers — extract to named constants
-
----
-
-## Testing Standards
-
-### Framework: GUT
-- Test scenes: `res://tests/`
-- Test scripts: `test_*.gd`
-- GUT runner: via editor plugin or CLI
-
-### Test Structure
-```gdscript
-extends GutTest
-
-var _topology_provider: TopologyProvider
-
-func before_each() -> void:
-    _topology_provider = TopologyProvider.new()
-
-func after_each() -> void:
-    _topology_provider.free()
-
-func test_same_seed_produces_same_heightmap() -> void:
-    # Arrange
-    var seed_a: int = 42
-    var seed_b: int = 42
-
-    # Act
-    var result_a: Array = _topology_provider.generate(seed_a)
-    var result_b: Array = _topology_provider.generate(seed_b)
-
-    # Assert
-    assert_eq(result_a, result_b, "Same seed must produce identical heightmaps")
-
-func test_different_seeds_produce_different_heightmaps() -> void:
-    var result_a: Array = _topology_provider.generate(42)
-    var result_b: Array = _topology_provider.generate(99)
-
-    assert_ne(result_a, result_b, "Different seeds should produce different heightmaps")
-```
-
-### Determinism Tests
-Every generator and tick must have a determinism test:
-```gdscript
-func test_ecology_tick_is_deterministic() -> void:
-    var state_a: EcologyState = _create_test_state()
-    var state_b: EcologyState = _create_test_state()
-
-    EcologyTick.execute(state_a)
-    EcologyTick.execute(state_b)
-
-    assert_eq(state_a, state_b, "Same input state must produce same output")
-```
-
-### Test Naming
-- Test scripts: `test_{domain}.gd` (e.g., `test_topology_provider.gd`)
-- Test functions: `test_{what_it_verifies}` (e.g., `test_same_seed_produces_same_heightmap`)
-- Helpers: `_create_test_{thing}` (e.g., `_create_test_state`)
+- camelCase variables/functions, PascalCase classes, UPPER_SNAKE_CASE constants
+- const by default, let when mutation needed
+- No inline styles or scripts in HTML
+- CSS values in custom properties
+- File assembly order: imports -> constants -> state -> functions -> init
 
 ---
 
 ## Execution
 1. **Delegate via sub-agents**: Use sub-agents for parallelizable work.
-   - Always explicitly name the sub-agent (e.g., "Delegating to **explore** sub-agent").
+   - Always explicitly name the sub-agent.
    - Sub-agents ask questions before they start work.
-   - Ask one question at a time, wait for an answer, then ask follow-up if needed.
-   - Format: `[Sub-Agent name] asks: {question}`
+   - One question at a time, wait for answer.
 
 2. **Incremental delivery**: Show progress per workflow phase. Iterate based on feedback.
 
-3. **Verification**: Include how to test/verify every change.
-   ```bash
-   # Run all tests via CLI
-   godot --headless -s addons/gut/gut_cmdln.gd
-
-   # Run specific test
-   godot --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_topology_provider.gd
-   ```
-
-4. **Data fetching**: Always ask before fetching data online.
-   - This includes sub-agents: do NOT delegate web fetches without asking permission first.
+3. **Data fetching**: Always ask before fetching data online.
+   - This includes sub-agents.
    - Format: "May I fetch [URL]?" and wait for approval.
-   - Multiple URLs: Ask explicitly for each. If >5 URLs, split into chunks by logical purpose.
 
 ---
 
@@ -383,7 +304,6 @@ Which takes precedence?
 ```
 
 ### Priority Hierarchy
-When resolving conflicts, apply in this order:
 1. User's explicit instruction in current conversation
 2. STOP CONDITIONS in this file
 3. `CLAUDE.md` — Architecture and code style rules

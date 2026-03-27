@@ -8,7 +8,7 @@
 | 2 | Design | Phase 1 output | Architecture document | `Claude/architecture/{feature}.md` |
 | 3 | Planning | Phase 2 output | Implementation plan | `Claude/plans/{feature}.md` |
 | 4 | Implementation | Phase 3 output | Source code | project directories per `CLAUDE.md` |
-| 5 | Verification | Phase 4 output | Test results | `tests/` |
+| 5 | Verification | Phase 4 output | Test results | browser + documented |
 
 ---
 
@@ -21,16 +21,16 @@
 
 ### Pre-Authorization
 User may authorize multiple phases upfront:
-- "Complete through Phase 3" → Deliver at Phase 3
-- "Implement without stopping" → Deliver at Phase 4
-- "Full implementation with tests" → Deliver at Phase 5
+- "Complete through Phase 3" -> Deliver at Phase 3
+- "Implement without stopping" -> Deliver at Phase 4
+- "Full implementation with tests" -> Deliver at Phase 5
 
 **Default** (no instruction): Stop after each phase for approval.
 
 ### Phase Skip Authorization
 User may skip phases by providing artifacts:
-- "Here's the architecture" → Skip Phase 2
-- "Just implement this plan" → Start at Phase 4
+- "Here's the architecture" -> Skip Phase 2
+- "Just implement this plan" -> Start at Phase 4
 
 **Never skippable**: Checklist verification (always required, even if abbreviated).
 
@@ -43,7 +43,7 @@ Ensure complete understanding before design begins.
 
 ### Activities
 1. Read all documents referenced by user
-2. Identify systems, layers, constraints, interactions
+2. Identify modules, pages, constraints, interactions
 3. List questions for anything unclear
 4. Resolve questions via STOP: Uncertainty protocol
 5. Produce summary artifact
@@ -57,13 +57,14 @@ Ensure complete understanding before design begins.
 |----------|----------|
 | {path} | {what it defines} |
 
-## Simulation Layers Affected
-| Layer | Impact | Description |
-|-------|--------|-------------|
-| Topology | {none/read/write} | {what changes} |
-| Ecology | {none/read/write} | {what changes} |
-| Economy | {none/read/write} | {what changes} |
-| Society | {none/read/write} | {what changes} |
+## Modules Affected
+| Module | Impact | Description |
+|--------|--------|-------------|
+| Parser | {none/read/write} | {what changes} |
+| Renderer | {none/read/write} | {what changes} |
+| Characters | {none/read/write} | {what changes} |
+| Search | {none/read/write} | {what changes} |
+| Styles | {none/read/write} | {what changes} |
 
 ## Interactions
 | ID | Name | Description | Priority |
@@ -75,10 +76,10 @@ Ensure complete understanding before design begins.
 |----|------------|--------|-----------|
 | C-01 | {constraint} | {document/user} | {why} |
 
-## Determinism Impact
+## Browser Compatibility
 | Concern | Resolution |
 |---------|------------|
-| {what could break determinism} | {how it's handled} |
+| {what could break in older browsers} | {how it's handled} |
 
 ## Resolved Questions
 | # | Question | Answer | Source |
@@ -95,10 +96,10 @@ Ensure complete understanding before design begins.
 ```
 PHASE 1 CHECKLIST:
 - [ ] All referenced documents read and summarized
-- [ ] Affected simulation layers identified
+- [ ] Affected modules identified
 - [ ] All interactions listed with priorities
 - [ ] All constraints documented with rationale
-- [ ] Determinism impact assessed
+- [ ] Browser compatibility assessed
 - [ ] No unresolved questions (or explicitly deferred)
 - [ ] Universal checklist passed
 ```
@@ -111,19 +112,18 @@ PHASE 1 CHECKLIST:
 Define system architecture with enough detail to plan implementation.
 
 ### Activities
-1. Define system context and boundaries within C3 Pipeline
-2. Identify components and their responsibilities (≤3 each)
+1. Define feature context and boundaries within the data pipeline
+2. Identify components and their responsibilities (<=3 each)
 3. Define interfaces between components
-4. Map data flow through Generate → State ↔ Simulate → Present
+4. Map data flow through Content -> Parser -> Blocks -> Renderer -> DOM
 5. Document architectural decisions with rationale
-6. Verify determinism is preserved
 
 ### Artifact Template
 ```markdown
 # {Feature} - Architecture
 
 ## 1. Purpose
-{What this feature does within the simulation}
+{What this feature does within the reader}
 
 ## 2. Scope
 {Boundaries — what's in, what's out}
@@ -135,16 +135,16 @@ Define system architecture with enough detail to plan implementation.
 
 ## 4. Data Flow
 ### 4.1 Pipeline Position
-{Where this feature sits in: Generate → State ↔ Simulate → Present}
+{Where this feature sits in: Content -> Parser -> Blocks -> Renderer -> DOM}
 
-### 4.2 State Ownership
-| State Slice | Owner (Tick) | Readers |
-|-------------|-------------|---------|
-| {State/X/} | {x_tick} | {who reads it} |
+### 4.2 Data Ownership
+| Data | Owner | Readers |
+|------|-------|---------|
+| {data} | {who writes} | {who reads} |
 
 ### 4.3 Data Flow Diagram
 ```
-{Component} → {State/Slice/} → {Consumer}
+{Component} -> {Data} -> {Consumer}
 ```
 
 ## 5. Building Blocks
@@ -159,8 +159,8 @@ Define system architecture with enough detail to plan implementation.
 #### {Component Name}
 **Responsibility**: {what it does}
 **Interfaces**:
-- Provides: {signal/method} — {description}
-- Requires: {signal/method} — {description}
+- Provides: {method/event} — {description}
+- Requires: {method/event} — {description}
 
 ## 6. Runtime View
 
@@ -168,42 +168,23 @@ Define system architecture with enough detail to plan implementation.
 **Trigger**: {what starts this}
 **Flow**:
 1. {Event/action}
-2. {Component} reads {State/Slice/}
+2. {Component} reads {data}
 3. {Component} computes {what}
-4. {Component} writes {State/Slice/}
-
-**Sequence**:
-```
-SimEvent → Simulate/Tick → State/Slice → Present/Component
-```
-
-(Repeat for each scenario)
+4. {Component} updates {DOM/state}
 
 ## 7. Data Structures
 
-### 7.1 {Entity/Resource Name}
+### 7.1 {Entity/Object Name}
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
 | {field} | {type} | {constraints} | {purpose} |
 
-## 8. Determinism Verification
-| Source of Non-Determinism | Mitigation |
-|--------------------------|------------|
-| {risk} | {how it's prevented} |
-
-## 9. LOD Behavior
-| Zone | Representation | Data Stored |
-|------|---------------|-------------|
-| Visual | {full render} | {all fields} |
-| Semantic 1 | {data point} | {aggregated fields} |
-| Semantic 2 | {graph edge} | {minimal fields} |
-
-## 10. Decisions Log
+## 8. Decisions Log
 | ID | Decision | Options | Choice | Rationale | Date |
 |----|----------|---------|--------|-----------|------|
 | D-01 | {decision} | {A, B, C} | {chosen} | {why} | {date} |
 
-## 11. Risks and Technical Debt
+## 9. Risks and Technical Debt
 | ID | Risk/Debt | Mitigation | Status |
 |----|-----------|------------|--------|
 | R-01 | {risk} | {mitigation} | {open/mitigated} |
@@ -213,12 +194,10 @@ SimEvent → Simulate/Tick → State/Slice → Present/Component
 ```
 PHASE 2 CHECKLIST:
 - [ ] All interactions from Phase 1 have runtime flows
-- [ ] All components have ≤3 responsibilities
+- [ ] All components have <=3 responsibilities
 - [ ] All interfaces fully specified (no TBD)
-- [ ] Data flow follows C3 Pipeline — no reverse flow
-- [ ] State ownership clear — only owning tick writes
-- [ ] Determinism verified — no randf(), no static state, no real-time deps
-- [ ] LOD behavior defined (if feature involves entities)
+- [ ] Data flow follows pipeline — no reverse flow
+- [ ] Data ownership clear — each piece has one writer
 - [ ] All architectural decisions have rationale
 - [ ] Universal checklist passed
 ```
@@ -244,23 +223,23 @@ Break design into implementable tasks with clear acceptance criteria.
 | Metric | Value |
 |--------|-------|
 | Total tasks | {N} |
-| Critical path | Task {X} → Task {Y} → Task {Z} |
+| Critical path | Task {X} -> Task {Y} -> Task {Z} |
 | Estimated complexity | {Low/Medium/High} |
 
 ## Dependency Graph
 ```
 Task 1 (no deps)
 Task 2 (no deps)
-Task 3 → depends on: Task 1
-Task 4 → depends on: Task 1, Task 2
-Task 5 → depends on: Task 3, Task 4
+Task 3 -> depends on: Task 1
+Task 4 -> depends on: Task 1, Task 2
+Task 5 -> depends on: Task 3, Task 4
 ```
 
 ## Tasks
 
 ### Task {N}: {Name}
 **Component**: {from design}
-**File(s)**: `{path/to/file.gd}`
+**File(s)**: `{path/to/file}`
 **Dependencies**: {Task IDs | "none"}
 
 **Description**:
@@ -276,8 +255,7 @@ Task 5 → depends on: Task 3, Task 4
 - [ ] {Measurable criterion}
 
 **Verification**:
-- Method: {unit test | integration test | manual verification}
-- Command: `{command to run}`
+- Method: {browser test | manual check | automated}
 - Expected: {expected outcome}
 
 ---
@@ -312,11 +290,9 @@ PHASE 3 CHECKLIST:
 Produce working code that satisfies the plan.
 
 ### Activities
-1. Write tests first — derived from the spec/design, NOT from the implementation
-2. Run tests (all must fail — no implementation yet)
-3. Implement production code to pass the tests
-4. Run tests (all must pass)
-5. Report progress for multi-task implementations
+1. Implement code per task
+2. Verify each task against acceptance criteria
+3. Report progress for multi-task implementations
 
 ### Progress Reporting (for multi-task implementations)
 After each task:
@@ -328,7 +304,7 @@ Acceptance Criteria:
 - [x] {criterion 2}
 
 Verification:
-- Command: `{command}`
+- Method: {method}
 - Result: {PASS | FAIL - details}
 
 Progress: {completed}/{total} tasks
@@ -343,10 +319,12 @@ PHASE 4 CHECKLIST:
 - [ ] All task verifications passed
 - [ ] No TODO/FIXME comments
 - [ ] No stub implementations
-- [ ] No randf() or Time.get_unix_time()
-- [ ] All variables typed
-- [ ] No static variables in Simulate/ or Generate/
-- [ ] Code runs without warnings
+- [ ] No inline styles or scripts in HTML
+- [ ] No hardcoded paths
+- [ ] No silently swallowed errors
+- [ ] CSS values in custom properties
+- [ ] File assembly order followed
+- [ ] Code runs without console errors
 - [ ] Universal checklist passed
 ```
 
@@ -358,32 +336,34 @@ PHASE 4 CHECKLIST:
 Confirm implementation meets requirements.
 
 ### Activities
-1. Run complete test suite
-2. Trace requirements to tests
-3. Verify determinism (same seed → same result)
+1. Test in all target browsers
+2. Test responsive layout
+3. Trace requirements to verification results
 4. Document any issues
 
 ### Artifact Template
 ```markdown
 # {Feature} - Verification Results
 
-## Test Execution
-| Suite | Total | Passed | Failed | Skipped |
-|-------|-------|--------|--------|---------|
-| Unit | {n} | {n} | {n} | {n} |
-| Determinism | {n} | {n} | {n} | {n} |
-| Integration | {n} | {n} | {n} | {n} |
+## Browser Testing
+| Browser | Version | Result |
+|---------|---------|--------|
+| Chrome | latest | {PASS/FAIL} |
+| Firefox | latest | {PASS/FAIL} |
+| Safari | latest | {PASS/FAIL} |
+| Mobile viewport | 375px | {PASS/FAIL} |
 
 ## Requirements Traceability
-| Requirement | Test(s) | Status |
-|-------------|---------|--------|
-| I-01 | test_x, test_y | {pass/fail} |
-| C-01 | test_constraint | {pass/fail} |
+| Requirement | Verification | Status |
+|-------------|-------------|--------|
+| I-01 | {how verified} | {pass/fail} |
+| C-01 | {how verified} | {pass/fail} |
 
-## Determinism Verification
-| Generator/Tick | Seeds Tested | Result |
-|---------------|-------------|--------|
-| {component} | {seed list} | {PASS/FAIL} |
+## Performance Check
+| Metric | Target | Actual | Status |
+|--------|--------|--------|--------|
+| Page load | {target} | {actual} | {pass/fail} |
+| Large content | {target} | {actual} | {pass/fail} |
 
 ## Failed Tests (if any)
 | Test | Failure Reason | Severity |
@@ -398,15 +378,15 @@ Confirm implementation meets requirements.
 ## Verification Summary
 - Overall: {PASS | FAIL}
 - Requirements coverage: {100% | X% — missing: ...}
-- Determinism: {VERIFIED | FAILED — details}
+- Browser compatibility: {all pass | failures: ...}
 ```
 
 ### Exit Checklist
 ```
 PHASE 5 CHECKLIST:
-- [ ] All tests pass
-- [ ] All requirements have test coverage
-- [ ] Determinism verified with multiple seeds
+- [ ] All target browsers pass
+- [ ] Responsive layout verified
+- [ ] All requirements have verification
 - [ ] No critical/high severity issues unresolved
 - [ ] Universal checklist passed
 ```
@@ -453,19 +433,18 @@ Project structure defined in `CLAUDE.md`. Workflow artifacts:
 
 ```
 Claude/
-├── requirements.md              — working rules (this project)
-├── workflow.md                  — this file
-├── game-description.md          — game design document
-├── requirements/
-│   └── {feature}.md             — Phase 1 artifacts
-├── architecture/
-│   └── {feature}.md             — Phase 2 artifacts
-└── plans/
-    └── {feature}.md             — Phase 3 artifacts
-
-tests/                           — Phase 4-5: GUT test scripts
-    └── test_{domain}.gd
+  requirements.md              — working rules (this project)
+  workflow.md                  — this file
+  developer.md                 — developer sub-agent definition
+  arch.md                      — document version control agent
+  tori.md                      — secretary sub-agent
+  requirements/
+    {feature}.md               — Phase 1 artifacts
+  architecture/
+    {feature}.md               — Phase 2 artifacts
+  plans/
+    {feature}.md               — Phase 3 artifacts
 ```
 
 **Naming conventions**:
-- `{feature}`: kebab-case (e.g., `topology-generation`, `ecology-tick`)
+- `{feature}`: kebab-case (e.g., `content-pipeline`, `character-panel`)

@@ -1,0 +1,114 @@
+.char-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 60px 24px 120px;
+}
+
+.char-page-name {
+  font-family: var(--font-ui);
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.char-page-aliases {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+
+.char-section-title {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  margin-top: 32px;
+}
+
+.char-avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-size: 28px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.char-scenes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.char-scene {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: all var(--transition);
+  display: block;
+
+  &:hover {
+    background: var(--surface-hover);
+    border-color: var(--border);
+    color: var(--text);
+  }
+}
+
+.char-relations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.char-relation {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: all var(--transition);
+
+  &:hover {
+    border-color: var(--accent-dim);
+    color: var(--accent);
+  }
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-bottom: 40px;
+  transition: color var(--transition);
+
+  &:hover { color: var(--text); }
+}
+
+.char-description {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-dim);
+}
