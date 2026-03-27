@@ -1,0 +1,22 @@
+{
+  "id": "example_char",
+  "names": ["Имя", "Прозвище", "Титул"],
+  "description": "",
+  "avatar": "",
+  "relations": [
+    {
+      "characterId": "other_char",
+      "type": "союзник",
+      "note": ""
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene_001",
+      "anchor": "scene-001",
+      "title": "",
+      "note": ""
+    }
+  ],
+  "gallery": []
+}

@@ -1,0 +1,7 @@
+[
+  {
+    "id": "example_char",
+    "names": ["Имя", "Прозвище", "Титул"],
+    "file": "data/characters/example_char.json"
+  }
+]
