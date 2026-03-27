@@ -1,6 +1,6 @@
-import { loadParser } from 'parser.js';
-import { Characters }  from 'characters.js';
-import { Search }      from 'search.js';
+import { loadParser } from './parser.js';
+import { Characters }  from './characters.js';
+import { Search }      from './search.js';
 
 // ── Reader ───────────────────────────────────────────────
 class Reader {
