@@ -1,7 +1,12 @@
 // ── Search ───────────────────────────────────────────────
+
+const MIN_QUERY_LENGTH = 2;
+const MAX_RESULTS      = 40;
+const SNIPPET_CONTEXT  = 60;
+
 export class Search {
   constructor(blocks) {
-    this.blocks = blocks; // parsed blocks from reader
+    this.blocks   = blocks;
     this._overlay = document.getElementById('search-overlay');
     this._input   = document.getElementById('search-input');
     this._results = document.getElementById('search-results');
@@ -29,7 +34,7 @@ export class Search {
 
   _run() {
     const q = this._input?.value.trim().toLowerCase();
-    if (!q || q.length < 2) { this._results.innerHTML = ''; return; }
+    if (!q || q.length < MIN_QUERY_LENGTH) { this._results.innerHTML = ''; return; }
 
     const hits = [];
     for (const block of this.blocks) {
@@ -37,14 +42,12 @@ export class Search {
       const idx = block.content.toLowerCase().indexOf(q);
       if (idx === -1) continue;
 
-      // extract snippet around match
-      const start = Math.max(0, idx - 60);
-      const end   = Math.min(block.content.length, idx + q.length + 60);
+      const start = Math.max(0, idx - SNIPPET_CONTEXT);
+      const end   = Math.min(block.content.length, idx + q.length + SNIPPET_CONTEXT);
       let snippet = block.content.slice(start, end);
       if (start > 0) snippet = '…' + snippet;
       if (end < block.content.length) snippet += '…';
 
-      // highlight
       const rx = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
       snippet = snippet.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       snippet = snippet.replace(rx, '<mark>$1</mark>');
@@ -52,23 +55,21 @@ export class Search {
       hits.push({ anchor: block.anchor, snippet, authorId: block.authorId });
     }
 
-    this._results.innerHTML = hits.slice(0, 40).map(h => `
+    this._results.innerHTML = hits.slice(0, MAX_RESULTS).map(h => `
       <div class="search-result" data-anchor="${h.anchor}">
-        ${h.authorId ? `<span style="color:var(--text-muted);font-size:11px;margin-bottom:4px;display:block">${h.authorId}</span>` : ''}
+        ${h.authorId ? `<span class="search-result-author">${h.authorId}</span>` : ''}
         ${h.snippet}
       </div>
     `).join('');
 
     this._results.querySelectorAll('.search-result').forEach(el => {
       el.addEventListener('click', () => {
-        const anchor = el.dataset.anchor;
-        const target = document.getElementById(anchor);
-        if (target) {
-          this.close();
-          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          target.style.outline = '1px solid var(--accent)';
-          setTimeout(() => target.style.outline = '', 1500);
-        }
+        const target = document.getElementById(el.dataset.anchor);
+        if (!target) return;
+        this.close();
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.classList.add('search-target-highlight');
+        setTimeout(() => target.classList.remove('search-target-highlight'), 1500);
       });
     });
   }

@@ -122,6 +122,18 @@
   }
 }
 
+.search-result-author {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.search-target-highlight {
+  outline: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+}
+
 /* ── main content ── */
 .main {
   margin-left: var(--panel-width);

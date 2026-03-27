@@ -85,8 +85,6 @@ export class Parser {
 
         currentAuthor      = author || { id: authorMatch.author, names: [authorMatch.author] };
         lastAuthorDatetime = authorMatch.datetime || null;
-
-        // strip date-only lines that follow author blocks
         continue;
       }
 

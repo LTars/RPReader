@@ -6,12 +6,14 @@
   <title>персонаж</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/reader.css">
+  <link rel="stylesheet" href="css/character.css">
 </head>
 <body>
 <div class="app">
   <nav class="panel" id="panel">
-    <a href="reader.html" class="panel-icon" title="Читалка">
+    <a href="reader.html" class="panel-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
@@ -21,77 +23,13 @@
 
   <main class="main">
     <div class="char-page" id="char-page">
-      <a href="reader.html" class="back-link">
-        ← вернуться к тексту
-      </a>
+      <a href="reader.html" class="back-link">← вернуться к тексту</a>
       <div id="char-content">
-        <div style="color:var(--text-muted);font-family:var(--font-ui);font-size:13px">
-          Загрузка...
-        </div>
+        <p class="char-loading"></p>
       </div>
     </div>
   </main>
 </div>
-
-<script type="module">
-  const params = new URLSearchParams(location.search);
-  const id = params.get('id');
-
-  if (!id) {
-    document.getElementById('char-content').innerHTML =
-      '<p style="color:var(--text-muted);font-family:var(--font-ui)">Персонаж не указан.</p>';
-  } else {
-    // load index to find file path
-    fetch('./data/characters/index.json')
-      .then(r => r.json())
-      .then(index => {
-        const entry = index.find(c => c.id === id);
-        if (!entry) throw new Error('not found');
-        return fetch('/' + entry.file).then(r => r.json());
-      })
-      .then(char => renderChar(char))
-      .catch(() => {
-        document.getElementById('char-content').innerHTML =
-          '<p style="color:var(--text-muted);font-family:var(--font-ui)">Персонаж не найден.</p>';
-      });
-  }
-
-  function renderChar(char) {
-    const [primary, ...aliases] = char.names;
-    document.title = primary;
-
-    const scenes = (char.scenes || []).map(s => `
-      <a class="char-scene" href="./reader.html#${s.anchor}">
-        ${s.title || s.id}
-        ${s.note ? `<span style="color:var(--text-muted);margin-left:8px">${s.note}</span>` : ''}
-      </a>
-    `).join('');
-
-    const relations = (char.relations || []).map(r => `
-      <a class="char-relation" href="./character.html?id=${r.characterId}">
-        ${r.characterId}${r.type ? ` · ${r.type}` : ''}
-      </a>
-    `).join('');
-
-    document.getElementById('char-content').innerHTML = `
-      <div class="char-avatar-placeholder">
-        ${primary[0]?.toUpperCase() || '?'}
-      </div>
-      <h1 class="char-page-name">${primary}</h1>
-      ${aliases.length ? `<div class="char-page-aliases">${aliases.join(' · ')}</div>` : ''}
-      ${char.description ? `<p style="font-size:15px;line-height:1.75;color:var(--text-dim)">${char.description}</p>` : ''}
-
-      ${relations ? `
-        <div class="char-section-title">Связи</div>
-        <div class="char-relations">${relations}</div>
-      ` : ''}
-
-      ${scenes ? `
-        <div class="char-section-title">Сцены</div>
-        <div class="char-scenes">${scenes}</div>
-      ` : ''}
-    `;
-  }
-</script>
+<script type="module" src="./js/character.js"></script>
 </body>
 </html>

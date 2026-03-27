@@ -112,3 +112,15 @@
   line-height: 1.75;
   color: var(--text-dim);
 }
+
+.char-loading,
+.char-error {
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+.char-scene-note {
+  color: var(--text-muted);
+  margin-left: 8px;
+}
