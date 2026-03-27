@@ -113,6 +113,66 @@
   color: var(--text-dim);
 }
 
+.char-library-title {
+  font-family: var(--font-ui);
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 24px;
+}
+
+.char-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.char-list-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  text-decoration: none;
+  transition: all var(--transition);
+
+  &:hover {
+    background: var(--surface-hover);
+    border-color: var(--border);
+  }
+}
+
+.char-list-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.char-list-name {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  color: var(--text);
+}
+
+.char-list-aliases {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
 .char-loading,
 .char-error {
   color: var(--text-muted);

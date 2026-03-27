@@ -139,13 +139,16 @@
   margin-left: var(--panel-width);
   flex: 1;
   padding: 40px 20px 120px;
-  max-width: 820px;
-  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   transition: margin-left var(--transition);
 }
 
 /* ── chat ── */
 .chat {
+  width: 100%;
+  max-width: 780px;
   display: flex;
   flex-direction: column;
   gap: 4px;

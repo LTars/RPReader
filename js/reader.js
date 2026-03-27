@@ -8,6 +8,8 @@ const PARSER_RULES_URL = BASE_URL + 'data/parser-rules.json';
 
 const UI = {
   MENU_TITLE:         'Меню',
+  HOME_TITLE:         'Главная',
+  CHARACTERS_TITLE:   'Персонажи',
   SEARCH_TITLE:       'Поиск (⌘K)',
   BLUE_FILTER_TITLE:  'Фильтр синего света',
   SEARCH_PLACEHOLDER: 'Поиск по тексту...',
@@ -135,16 +137,20 @@ class Reader {
 
   // ── UI bindings ──────────────────────────────────────
   _bindUI() {
-    const panelToggle = document.getElementById('panel-toggle');
-    const panel = document.querySelector('.panel');
-    const searchBtn = document.getElementById('search-btn');
+    const panelToggle   = document.getElementById('panel-toggle');
+    const panel         = document.querySelector('.panel');
+    const homeBtn       = document.getElementById('home-btn');
+    const charsBtn      = document.getElementById('characters-btn');
+    const searchBtn     = document.getElementById('search-btn');
     const blueFilterBtn = document.getElementById('blue-filter-btn');
-    const searchInput = document.getElementById('search-input');
+    const searchInput   = document.getElementById('search-input');
 
-    if (panelToggle) panelToggle.title = UI.MENU_TITLE;
-    if (searchBtn) searchBtn.title = UI.SEARCH_TITLE;
+    if (panelToggle)   panelToggle.title   = UI.MENU_TITLE;
+    if (homeBtn)       homeBtn.title       = UI.HOME_TITLE;
+    if (charsBtn)      charsBtn.title      = UI.CHARACTERS_TITLE;
+    if (searchBtn)     searchBtn.title     = UI.SEARCH_TITLE;
     if (blueFilterBtn) blueFilterBtn.title = UI.BLUE_FILTER_TITLE;
-    if (searchInput) searchInput.placeholder = UI.SEARCH_PLACEHOLDER;
+    if (searchInput)   searchInput.placeholder = UI.SEARCH_PLACEHOLDER;
 
     panelToggle?.addEventListener('click', () => {
       panel?.classList.toggle('expanded');

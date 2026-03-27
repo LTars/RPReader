@@ -2,31 +2,78 @@ const BASE_URL       = new URL('../', import.meta.url).href;
 const CHAR_INDEX_URL = BASE_URL + 'data/characters/index.json';
 
 const UI = {
-  NAV_READER_TITLE: 'Читалка',
-  LOADING:          'Загрузка...',
-  NO_ID:            'Персонаж не указан.',
-  NOT_FOUND:        'Персонаж не найден.',
+  NAV_READER_TITLE:  'Читалка',
+  LOADING:           'Загрузка...',
+  NO_ID:             'Персонаж не указан.',
+  NOT_FOUND:         'Персонаж не найден.',
+  LIBRARY_TITLE:     'Персонажи',
+  LIBRARY_EMPTY:     'Персонажей пока нет.',
   SECTION_RELATIONS: 'Связи',
   SECTION_SCENES:    'Сцены',
+  BACK_READER:       '← вернуться к тексту',
+  BACK_LIBRARY:      '← все персонажи',
 };
 
 // ── init ─────────────────────────────────────────────────
-const navLink = document.querySelector('.panel .panel-icon');
+const navLink  = document.querySelector('.panel .panel-icon');
 if (navLink) navLink.title = UI.NAV_READER_TITLE;
 
-const content = document.getElementById('char-content');
+const backLink = document.querySelector('.back-link');
+const content  = document.getElementById('char-content');
+const params   = new URLSearchParams(location.search);
+const id       = params.get('id');
+
 content.innerHTML = `<p class="char-loading">${UI.LOADING}</p>`;
 
-const params = new URLSearchParams(location.search);
-const id     = params.get('id');
-
-if (!id) {
-  content.innerHTML = `<p class="char-error">${UI.NO_ID}</p>`;
-} else {
+if (id) {
+  if (backLink) {
+    backLink.href        = BASE_URL + 'character.html';
+    backLink.textContent = UI.BACK_LIBRARY;
+  }
   loadChar(id);
+} else {
+  if (backLink) {
+    backLink.href        = BASE_URL + 'index.html';
+    backLink.textContent = UI.BACK_READER;
+  }
+  loadLibrary();
 }
 
-// ── functions ─────────────────────────────────────────────
+// ── library ───────────────────────────────────────────────
+async function loadLibrary() {
+  try {
+    const resp = await fetch(CHAR_INDEX_URL);
+    if (!resp.ok) throw new Error(`Index load failed: ${resp.status}`);
+    const index = await resp.json();
+    renderLibrary(index);
+  } catch (err) {
+    console.error('Library load failed:', err);
+    content.innerHTML = `<p class="char-error">${UI.NOT_FOUND}</p>`;
+  }
+}
+
+function renderLibrary(index) {
+  const items = index.map(entry => `
+    <a class="char-list-item" href="${BASE_URL}character.html?id=${entry.id}">
+      <div class="char-list-avatar">${entry.names[0][0].toUpperCase()}</div>
+      <div>
+        <div class="char-list-name">${entry.names[0]}</div>
+        ${entry.names.length > 1
+          ? `<div class="char-list-aliases">${entry.names.slice(1).join(' · ')}</div>`
+          : ''}
+      </div>
+    </a>
+  `).join('');
+
+  content.innerHTML = `
+    <h1 class="char-library-title">${UI.LIBRARY_TITLE}</h1>
+    ${items
+      ? `<div class="char-list">${items}</div>`
+      : `<p class="char-error">${UI.LIBRARY_EMPTY}</p>`}
+  `;
+}
+
+// ── character detail ──────────────────────────────────────
 async function loadChar(charId) {
   try {
     const indexResp = await fetch(CHAR_INDEX_URL);
