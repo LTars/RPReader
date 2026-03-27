@@ -148,7 +148,7 @@ export class Parser {
 }
 
 // ── static loader ────────────────────────────────────────
-export async function loadParser(rulesUrl = 'parser-rules.json') {
+export async function loadParser(rulesUrl = '../data/parser-rules.json') {
   const resp = await fetch(rulesUrl);
   if (!resp.ok) throw new Error(`Failed to load parser rules: ${resp.status}`);
   const rules = await resp.json();
