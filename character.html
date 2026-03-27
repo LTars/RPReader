@@ -42,7 +42,7 @@
       '<p style="color:var(--text-muted);font-family:var(--font-ui)">Персонаж не указан.</p>';
   } else {
     // load index to find file path
-    fetch('/data/characters/index.json')
+    fetch('./data/characters/index.json')
       .then(r => r.json())
       .then(index => {
         const entry = index.find(c => c.id === id);
@@ -61,14 +61,14 @@
     document.title = primary;
 
     const scenes = (char.scenes || []).map(s => `
-      <a class="char-scene" href="/reader.html#${s.anchor}">
+      <a class="char-scene" href="./reader.html#${s.anchor}">
         ${s.title || s.id}
         ${s.note ? `<span style="color:var(--text-muted);margin-left:8px">${s.note}</span>` : ''}
       </a>
     `).join('');
 
     const relations = (char.relations || []).map(r => `
-      <a class="char-relation" href="/character.html?id=${r.characterId}">
+      <a class="char-relation" href="./character.html?id=${r.characterId}">
         ${r.characterId}${r.type ? ` · ${r.type}` : ''}
       </a>
     `).join('');
