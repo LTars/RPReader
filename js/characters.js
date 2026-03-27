@@ -26,6 +26,7 @@ export class Characters {
 
   // ── load ─────────────────────────────────────────────
   async load(indexUrl = 'RPReader/data/characters/index.json') {
+	console.log('Characters.load url:', indexUrl);
     const resp = await fetch(indexUrl);
     if (!resp.ok) throw new Error(`Characters index load failed: ${resp.status}`);
     this.index = await resp.json();
