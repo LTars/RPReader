@@ -1,7 +1,188 @@
 [
   {
-    "id": "example_char",
-    "names": ["Имя", "Прозвище", "Титул"],
-    "file": "data/characters/example_char.json"
+    "id": "lan-xichen",
+    "clan": "Лань",
+    "names": ["Лань Сичэнь", "Лань Хуань", "Цзэу-цзюнь"],
+    "file": "data/characters/lan-xichen.json"
+  },
+  {
+    "id": "lan-wangji",
+    "clan": "Лань",
+    "names": ["Лань Ванцзи", "Лань Чжань", "Ханьгуан-цзюнь"],
+    "file": "data/characters/lan-wangji.json"
+  },
+  {
+    "id": "lan-qiren",
+    "clan": "Лань",
+    "names": ["Лань Цижэнь"],
+    "file": "data/characters/lan-qiren.json"
+  },
+  {
+    "id": "lan-hengqing",
+    "clan": "Лань",
+    "names": ["Лань Хэнцин"],
+    "file": "data/characters/lan-hengqing.json"
+  },
+  {
+    "id": "lan-zifei",
+    "clan": "Лань",
+    "names": ["Лань Цзыфэй"],
+    "file": "data/characters/lan-zifei.json"
+  },
+  {
+    "id": "lan-shuanghe",
+    "clan": "Лань",
+    "names": ["Лань Шуанхэ"],
+    "file": "data/characters/lan-shuanghe.json"
+  },
+  {
+    "id": "lan-weichan",
+    "clan": "Лань",
+    "names": ["Лань Вэйчань"],
+    "file": "data/characters/lan-weichan.json"
+  },
+  {
+    "id": "jin-guangyao",
+    "clan": "Цзинь",
+    "names": ["Цзинь Гуанъяо", "Мэн Яо", "Лянь-фан-цзюнь", "Сяньду"],
+    "file": "data/characters/jin-guangyao.json"
+  },
+  {
+    "id": "jin-guangshan",
+    "clan": "Цзинь",
+    "names": ["Цзинь Гуаншань"],
+    "file": "data/characters/jin-guangshan.json"
+  },
+  {
+    "id": "jin-zixuan",
+    "clan": "Цзинь",
+    "names": ["Цзинь Цзысюань"],
+    "file": "data/characters/jin-zixuan.json"
+  },
+  {
+    "id": "jin-ling",
+    "clan": "Цзинь",
+    "names": ["Цзинь Лин", "Цзинь Жулань"],
+    "file": "data/characters/jin-ling.json"
+  },
+  {
+    "id": "jin-baoshan",
+    "clan": "Цзинь",
+    "names": ["Цзинь Баошань", "Баошань"],
+    "file": "data/characters/jin-baoshan.json"
+  },
+  {
+    "id": "jin-chenglei",
+    "clan": "Цзинь",
+    "names": ["Цзинь Чэнлэй"],
+    "file": "data/characters/jin-chenglei.json"
+  },
+  {
+    "id": "jin-fan",
+    "clan": "Цзинь",
+    "names": ["Цзинь Фан"],
+    "file": "data/characters/jin-fan.json"
+  },
+  {
+    "id": "jin-hua",
+    "clan": "Цзинь",
+    "names": ["Цзинь Хуа"],
+    "file": "data/characters/jin-hua.json"
+  },
+  {
+    "id": "jin-wei",
+    "clan": "Цзинь",
+    "names": ["Цзинь Вэй"],
+    "file": "data/characters/jin-wei.json"
+  },
+  {
+    "id": "jin-mei",
+    "clan": "Цзинь",
+    "names": ["Цзинь Мэй"],
+    "file": "data/characters/jin-mei.json"
+  },
+  {
+    "id": "jin-xiu",
+    "clan": "Цзинь",
+    "names": ["Цзинь Сю"],
+    "file": "data/characters/jin-xiu.json"
+  },
+  {
+    "id": "jiang-cheng",
+    "clan": "Цзян",
+    "names": ["Цзян Чэн", "Цзян Ваньинь", "Саньду Шэншоу"],
+    "file": "data/characters/jiang-cheng.json"
+  },
+  {
+    "id": "jiang-fengmian",
+    "clan": "Цзян",
+    "names": ["Цзян Фэнмянь"],
+    "file": "data/characters/jiang-fengmian.json"
+  },
+  {
+    "id": "yu-ziyuan",
+    "clan": "Юй",
+    "names": ["Юй Цзыюань", "госпожа Юй"],
+    "file": "data/characters/yu-ziyuan.json"
+  },
+  {
+    "id": "jiang-yanli",
+    "clan": "Цзян",
+    "names": ["Цзян Яньли"],
+    "file": "data/characters/jiang-yanli.json"
+  },
+  {
+    "id": "wen-ruohan",
+    "clan": "Вэнь",
+    "names": ["Вэнь Жохань"],
+    "file": "data/characters/wen-ruohan.json"
+  },
+  {
+    "id": "wen-chao",
+    "clan": "Вэнь",
+    "names": ["Вэнь Чао"],
+    "file": "data/characters/wen-chao.json"
+  },
+  {
+    "id": "wen-ning",
+    "clan": "Вэнь",
+    "names": ["Вэнь Нин", "Вэнь Цюнлу", "Гуйцзян-цзюнь", "Призрачный генерал"],
+    "file": "data/characters/wen-ning.json"
+  },
+  {
+    "id": "nie-huaisang",
+    "clan": "Не",
+    "names": ["Не Хуайсан"],
+    "file": "data/characters/nie-huaisang.json"
+  },
+  {
+    "id": "nie-mingjue",
+    "clan": "Не",
+    "names": ["Не Минцзюэ", "Чифэн-цзюнь"],
+    "file": "data/characters/nie-mingjue.json"
+  },
+  {
+    "id": "su-she",
+    "clan": "Су",
+    "names": ["Су Шэ"],
+    "file": "data/characters/su-she.json"
+  },
+  {
+    "id": "wei-wuxian",
+    "clan": "Вэй",
+    "names": ["Вэй Усьянь", "Вэй Ин", "Илин Лаоцзу"],
+    "file": "data/characters/wei-wuxian.json"
+  },
+  {
+    "id": "mo-xuanyu",
+    "clan": "Мо",
+    "names": ["Мо Сюаньюй"],
+    "file": "data/characters/mo-xuanyu.json"
+  },
+  {
+    "id": "xue-yang",
+    "clan": "Сюэ",
+    "names": ["Сюэ Ян", "Чэнмэй"],
+    "file": "data/characters/xue-yang.json"
   }
 ]
