@@ -8,6 +8,7 @@ const CHAR_INDEX_URL = BASE_URL + 'data/characters/index.json';
 const PANEL_LINK_LABEL = 'Страница персонажа';
 const ALIASES_PREFIX   = 'также: ';
 const HOVER_DELAY_MS   = 1000;
+const HOVER_HIDE_MS    = 500;
 const HIGHLIGHT_MS     = 1200;
 
 export class Characters {
@@ -16,6 +17,7 @@ export class Characters {
     this.cache   = {};      // id → full character data
     this.nameMap = {};      // lowercase name → id
     this._hoverTimer    = null;
+    this._hideTimer     = null;
     this._lastVisited   = null;
     this._panelCharId   = null;  // id персонажа в открытой панели
     this._pendingCharId = null;  // id персонажа в процессе загрузки
@@ -29,6 +31,11 @@ export class Characters {
 
     const linkLabel = document.getElementById('char-panel-link-label');
     if (linkLabel) linkLabel.textContent = PANEL_LINK_LABEL;
+
+    this._tooltip?.addEventListener('mouseenter', () => clearTimeout(this._hideTimer));
+    this._tooltip?.addEventListener('mouseleave', () => {
+      this._hideTimer = setTimeout(() => this._hideTooltip(), HOVER_HIDE_MS);
+    });
 
     this._panelClose?.addEventListener('click', () => this.closePanel());
 
@@ -112,12 +119,13 @@ export class Characters {
     if (!window.matchMedia('(pointer: fine)').matches) return;
     const id = this._charId(el);
     clearTimeout(this._hoverTimer);
+    clearTimeout(this._hideTimer);
     this._hoverTimer = setTimeout(() => this._showTooltip(id, el), HOVER_DELAY_MS);
   }
 
   _onHoverEnd() {
     clearTimeout(this._hoverTimer);
-    this._hideTooltip();
+    this._hideTimer = setTimeout(() => this._hideTooltip(), HOVER_HIDE_MS);
   }
 
   _showTooltip(id, el) {
