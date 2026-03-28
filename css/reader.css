@@ -277,7 +277,7 @@
   &.visited { border-bottom-color: var(--accent-dim); }
 
   &.highlighted {
-    animation: highlight-pulse 2s ease forwards;
+    animation: highlight-pulse 1s ease forwards;
   }
 }
 
@@ -381,6 +381,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  cursor: pointer;
   font-family: var(--font-ui);
 }
 

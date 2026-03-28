@@ -27,8 +27,13 @@ content.innerHTML = `<p class="char-loading">${UI.LOADING}</p>`;
 
 if (id) {
   if (backLink) {
-    backLink.href        = BASE_URL + 'character.html';
-    backLink.textContent = UI.BACK_LIBRARY;
+    if (sessionStorage.getItem('returnLinkId')) {
+      backLink.href        = BASE_URL + 'reader.html';
+      backLink.textContent = UI.BACK_READER;
+    } else {
+      backLink.href        = BASE_URL + 'character.html';
+      backLink.textContent = UI.BACK_LIBRARY;
+    }
   }
   loadChar(id);
 } else {

@@ -112,6 +112,7 @@ class Reader {
     }
 
     this.characters.bindLinks(chat);
+    this.characters.checkReturnHighlight();
     this.search = new Search(this.blocks);
   }
 
