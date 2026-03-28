@@ -3,7 +3,9 @@
     "allow": [
       "Bash(echo:*)",
       "Bash(command:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(wc:*)",
+      "Bash(git add:*)"
     ]
   }
 }

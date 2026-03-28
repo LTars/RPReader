@@ -1,3 +1,39 @@
+> **File reading:** Delegate to `Lib` (`Claude/librarian.md`) — pass `files`, `focus`, `format`; receive fragments with line numbers.
+
+## Agent Pipeline
+
+**Required workflow for any task:**
+
+1. **Initial Understanding** (phase 1)
+   - Use Explore agent (subagent_type: "Explore") for unknown areas, multiple file types, or architecture discovery
+   - For specific file searches, use Glob/Grep directly
+   - Build understanding before planning
+
+2. **Planning** (phase 2)
+   - Non-trivial tasks → launch Plan agent (subagent_type: "Plan")
+   - Skip planning only for: typos, single-line fixes, obvious bugs, or explicit detailed instructions
+   - Design approach with context from phase 1
+
+3. **Review & Clarification** (phase 3)
+   - Read critical files identified by agents
+   - Use AskUserQuestion for ambiguities — never assume
+   - Verify alignment with original request
+
+4. **Plan Approval** (phase 4)
+   - Write final plan to plan file
+   - Call ExitPlanMode to request user approval
+   - Never code before this approval
+
+5. **Implementation**
+   - Only after ExitPlanMode approval
+   - Use Edit/Write for code changes, not Bash for file operations
+   - Commit only when explicitly asked
+
+**File reading at any phase:**
+- Always delegate to Lib agent (Claude/librarian.md)
+- Do NOT read large files directly with Read tool
+- Pass structured params: `files`, `focus`, `format`
+
 # Project
 
 **RPReader** — web reader for roleplay text in chat format. Telegram RP conversations are parsed into blocks and displayed as a chat with bubbles, characters, and search.
@@ -125,13 +161,11 @@ Claude/                   — workflow definitions and agent roles
 - `content/*.md` — authored text, do not modify content
 - `data/*.json` — configuration, can edit
 
-## Workflow
-- Describe approach before writing code, get approval before implementing
-- Breaking changes require a separate discussion before any code
-- When facing ambiguity — always ask, never assume
+## Workflow (Git & Deployment)
 - Version control: Git via bash
-- Ask before committing
+- Always ask before committing
 - Never push to remote
+- Breaking changes require separate discussion before implementation
 - Deploy: standard GitHub Pages directly from main branch
 - URL: https://ltars.github.io/RPReader/
 

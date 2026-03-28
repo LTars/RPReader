@@ -8,7 +8,7 @@
     },
     {
       "id": "zaveta",
-      "names": ["zaveta-Даша", "zaveta", "zavet", "Даша"],
+      "names": ["zavet", "zaveta", "Даша"],
       "defaultSide": "left",
       "color": "#67e8f9"
     }
@@ -37,9 +37,9 @@
   "transforms": [
     {
       "name": "normalize_zaveta",
-      "description": "zaveta → zaveta-Даша везде кроме заголовков",
+      "description": "zaveta → zavet везде кроме заголовков",
       "find": "\\bzaveta\\b",
-      "replace": "zaveta-Даша",
+      "replace": "zavet",
       "flags": "g"
     }
   ],
