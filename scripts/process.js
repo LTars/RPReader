@@ -360,6 +360,13 @@ function main() {
     }
   }
 
+  // обновить index.json блоков
+  const INDEX_PATH = join(BLOCKS_DIR, 'index.json');
+  const existing = existsSync(INDEX_PATH)
+    ? JSON.parse(readFileSync(INDEX_PATH, 'utf-8'))
+    : [];
+  writeFileSync(INDEX_PATH, JSON.stringify([...existing, ...written], null, 2), 'utf-8');
+
   // сохранить appearances
   writeFileSync(APPEARANCES_PATH, JSON.stringify(appearances, null, 2), 'utf-8');
 

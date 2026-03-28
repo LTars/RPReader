@@ -1,10 +1,31 @@
-import { loadParser } from './parser.js';
 import { Characters }  from './characters.js';
 import { Search }      from './search.js';
 
-const BASE_URL = new URL('../', import.meta.url).href;
-const CONTENT_URL = BASE_URL + 'content/main.md';
+const BASE_URL        = new URL('../', import.meta.url).href;
+const BLOCKS_URL      = BASE_URL + 'content/blocks/';
 const PARSER_RULES_URL = BASE_URL + 'data/parser-rules.json';
+
+function parseBlock(text, filename) {
+  const fmMatch = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!fmMatch) return null;
+
+  const fm = {};
+  for (const line of fmMatch[1].split('\n')) {
+    const colon = line.indexOf(':');
+    if (colon === -1) continue;
+    fm[line.slice(0, colon).trim()] = line.slice(colon + 1).trim();
+  }
+
+  const stem = filename.replace(/\.md$/, '');
+  return {
+    anchor:   stem,
+    type:     fm.type     || 'message',
+    authorId: fm.author   || null,
+    side:     fm.side     || 'right',
+    datetime: fm.datetime || null,
+    content:  fmMatch[2].trim(),
+  };
+}
 
 const UI = {
   MENU_TITLE:         'Меню',
@@ -19,7 +40,7 @@ const UI = {
 // ── Reader ───────────────────────────────────────────────
 class Reader {
   constructor() {
-    this.parser     = null;
+    this.authors    = [];
     this.characters = new Characters();
     this.search     = null;
     this.blocks     = [];
@@ -30,26 +51,36 @@ class Reader {
 
   async init() {
     await Promise.all([
-      this._loadParser(),
-      this.characters.load()
+      this.characters.load(),
+      this._loadAuthors(),
     ]);
-
     await this._loadContent();
     this._render();
     this._bindUI();
     this._updateProgress();
   }
 
-  // ── load & parse ─────────────────────────────────────
-  async _loadParser() {
-    this.parser = await loadParser(PARSER_RULES_URL);
+  // ── load ─────────────────────────────────────────────
+  async _loadAuthors() {
+    const resp = await fetch(PARSER_RULES_URL);
+    if (!resp.ok) throw new Error('Parser rules load failed');
+    const rules = await resp.json();
+    this.authors = rules.authors || [];
   }
 
   async _loadContent() {
-    const resp = await fetch(CONTENT_URL);
-    if (!resp.ok) throw new Error('Content load failed');
-    const raw = await resp.text();
-    this.blocks = this.parser.parse(raw);
+    const indexResp = await fetch(BLOCKS_URL + 'index.json');
+    if (!indexResp.ok) throw new Error('Blocks index load failed');
+    const filenames = await indexResp.json();
+
+    const blocks = new Array(filenames.length);
+    await Promise.all(filenames.map(async (filename, i) => {
+      const resp = await fetch(BLOCKS_URL + filename);
+      if (!resp.ok) throw new Error(`Block load failed: ${filename}`);
+      blocks[i] = parseBlock(await resp.text(), filename);
+    }));
+
+    this.blocks = blocks.filter(Boolean);
   }
 
   // ── render ───────────────────────────────────────────
@@ -89,7 +120,7 @@ class Reader {
     div.className = `author-header ${block.side}`;
 
     const authorName = block.authorId
-      ? (this.parser.authors.find(a => a.id === block.authorId)?.names[0] || block.authorId)
+      ? (this.authors.find(a => a.id === block.authorId)?.names[0] || block.authorId)
       : UI.UNKNOWN_AUTHOR;
 
     div.innerHTML = `
@@ -115,10 +146,8 @@ class Reader {
     const processedLines = lines.map(line => {
       const trimmed = line.trim();
       if (!trimmed) return '';
-
-      const wrapped = this.characters.wrapNames(trimmed);
       const cls = /^[-–—]/.test(trimmed) ? ' class="dialogue"' : '';
-      return `<p${cls}>${wrapped}</p>`;
+      return `<p${cls}>${trimmed}</p>`;
     });
 
     bubble.innerHTML = processedLines.filter(Boolean).join('');
