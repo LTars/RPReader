@@ -84,10 +84,16 @@ async function loadChar(charId) {
     if (!entry) throw new Error('not found');
 
     const charResp = await fetch(BASE_URL + entry.file);
-    if (!charResp.ok) throw new Error(`Char load failed: ${charResp.status}`);
-    const char = await charResp.json();
-
-    renderChar(char);
+    if (charResp.ok) {
+      renderChar(await charResp.json());
+    } else {
+      const exResp = await fetch(BASE_URL + 'data/characters/example_char.json');
+      if (!exResp.ok) throw new Error(`Example load failed: ${exResp.status}`);
+      const example = await exResp.json();
+      example.id = entry.id;
+      example.names = [entry.names[0]];
+      renderChar(example);
+    }
   } catch (err) {
     console.error('Character load failed:', err);
     content.innerHTML = `<p class="char-error">${UI.NOT_FOUND}</p>`;
