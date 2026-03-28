@@ -195,13 +195,16 @@ export class Characters {
     if (!entry) return null;
     try {
       const resp = await fetch(BASE_URL + entry.file);
-      if (!resp.ok) return null;
+      if (!resp.ok) {
+        this.cache[id] = entry;
+        return entry;
+      }
       const data = await resp.json();
       this.cache[id] = data;
       return data;
-    } catch (err) {
-      console.error('Character load failed:', err);
-      return null;
+    } catch {
+      this.cache[id] = entry;
+      return entry;
     }
   }
 }
