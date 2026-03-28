@@ -126,7 +126,7 @@ function linkCharacters(text, charData) {
       linked += line.slice(pos, matchStart);
 
       if (token.type === 'name') {
-        linked += `<a href="character.html?id=${token.id}" class="char-link">${matchText}</a>`;
+        linked += `<a href="character.html?id=${token.id}" class="char-link" data-char-id="${token.id}">${matchText}</a>`;
         // обновить lastSeen для клана этого персонажа
         for (const [clan, ids] of Object.entries(clanMap)) {
           if (ids.includes(token.id)) {
@@ -139,7 +139,7 @@ function linkCharacters(text, charData) {
         const clan = matchText;
         const resolved = lastSeen[clan];
         if (resolved) {
-          linked += `<a href="character.html?id=${resolved}" class="char-link">${matchText}</a>`;
+          linked += `<a href="character.html?id=${resolved}" class="char-link" data-char-id="${resolved}">${matchText}</a>`;
         } else {
           linked += `<a href="" class="char-link unresolved">${matchText}</a>`;
         }

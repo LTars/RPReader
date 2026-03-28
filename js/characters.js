@@ -76,9 +76,15 @@ export class Characters {
     });
   }
 
+  _charId(el) {
+    return el.dataset.charId
+      || new URLSearchParams(new URL(el.href || '', location.href).search).get('id')
+      || null;
+  }
+
   // ── tooltip ──────────────────────────────────────────
   _onHoverStart(e) {
-    const id = e.target.dataset.charId;
+    const id = this._charId(e.target);
     clearTimeout(this._tooltipTimer);
     this._tooltipTimer = setTimeout(() => this._showTooltip(id, e), 2000);
   }
@@ -107,7 +113,7 @@ export class Characters {
   // ── click → panel ────────────────────────────────────
   async _onClick(e) {
     e.preventDefault();
-    const id = e.currentTarget.dataset.charId;
+    const id = this._charId(e.currentTarget);
     const char = await this._loadChar(id);
     if (!char) return;
 
