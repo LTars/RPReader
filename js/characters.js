@@ -20,6 +20,7 @@ export class Characters {
     this._panelCharId   = null;  // id персонажа в открытой панели
     this._pendingCharId = null;  // id персонажа в процессе загрузки
 
+    this._tooltip      = document.getElementById('char-tooltip');
     this._panel        = document.getElementById('char-panel');
     this._panelName    = document.getElementById('char-panel-name');
     this._panelAliases = document.getElementById('char-panel-aliases');
@@ -43,6 +44,8 @@ export class Characters {
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') this.closePanel();
     });
+
+    this._initPanelSwipe();
   }
 
   // ── load ─────────────────────────────────────────────
@@ -104,25 +107,38 @@ export class Characters {
       || null;
   }
 
-  // ── hover → панель через 1 секунду ───────────────────
+  // ── hover (только десктоп, pointer: fine) → тултип ──
   _onHoverStart(el) {
+    if (!window.matchMedia('(pointer: fine)').matches) return;
     const id = this._charId(el);
     clearTimeout(this._hoverTimer);
-    this._hoverTimer = setTimeout(async () => {
-      if (this._panelCharId === id) return; // панель уже открыта для этого персонажа
-      const char = await this._loadChar(id);
-      if (!char) return;
-      this._lastVisited = el;
-      el.classList.add('visited');
-      this._panelCharId = id;
-      this._pendingCharId = null;
-      this._openPanel(char);
-    }, HOVER_DELAY_MS);
+    this._hoverTimer = setTimeout(() => this._showTooltip(id, el), HOVER_DELAY_MS);
   }
 
   _onHoverEnd() {
     clearTimeout(this._hoverTimer);
-    // панель остаётся открытой, если уже показана
+    this._hideTooltip();
+  }
+
+  _showTooltip(id, el) {
+    const entry = this.index.find(c => c.id === id);
+    if (!entry || !this._tooltip) return;
+
+    const [primary, ...aliases] = entry.names;
+    this._tooltip.querySelector('.tooltip-name').textContent = primary;
+    this._tooltip.querySelector('.tooltip-aliases').textContent =
+      aliases.length ? aliases.join(' · ') : '';
+
+    const rect = el.getBoundingClientRect();
+    const x = Math.min(rect.left, window.innerWidth - 260);
+    const y = rect.bottom + 8;
+    this._tooltip.style.left = x + 'px';
+    this._tooltip.style.top  = y + 'px';
+    this._tooltip.classList.add('show');
+  }
+
+  _hideTooltip() {
+    this._tooltip?.classList.remove('show');
   }
 
   // ── клик: первый → открыть панель, второй → перейти ──
@@ -151,6 +167,25 @@ export class Characters {
     this._panelCharId = id;
     this._pendingCharId = null;
     this._openPanel(char);
+  }
+
+  // ── свайп-жесты для мобильной панели ─────────────────
+  _initPanelSwipe() {
+    if (!this._panel) return;
+    let startY = 0;
+
+    this._panel.addEventListener('touchstart', e => {
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    this._panel.addEventListener('touchend', e => {
+      const deltaY = e.changedTouches[0].clientY - startY;
+      if (deltaY > 60) {
+        this.closePanel();
+      } else if (deltaY < -60 && this._panelCharId) {
+        this._navigateToChar(this._panelCharId, this._lastVisited);
+      }
+    }, { passive: true });
   }
 
   _navigateToChar(id, el) {
