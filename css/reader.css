@@ -296,17 +296,60 @@
   border-radius: var(--radius);
   padding: 12px 14px;
   min-width: 160px;
-  max-width: 240px;
+  max-width: 260px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
   pointer-events: none;
   opacity: 0;
   transform: translateY(4px);
   transition: opacity 0.15s, transform 0.15s;
   font-family: var(--font-ui);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
 
   &.show {
     opacity: 1;
     transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* invisible bridge so mouse can travel from link to tooltip */
+  &.above::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -10px;
+    height: 10px;
+  }
+
+  &:not(.above)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -10px;
+    height: 10px;
+  }
+
+  .tooltip-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .tooltip-info {
+    min-width: 0;
   }
 
   .tooltip-name {
@@ -321,6 +364,16 @@
     color: var(--text-muted);
     line-height: 1.6;
   }
+}
+
+/* ── return focus overlay ── */
+.return-focus-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--accent-glow);
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
 }
 
 /* ── character panel ── */
@@ -340,6 +393,8 @@
   overflow: hidden;
 
   &.open { transform: translateX(0); }
+
+  &.swiping { transition: none; }
 }
 
 .char-panel-header {
@@ -466,8 +521,12 @@
     border-top: 1px solid var(--border);
     border-radius: var(--radius) var(--radius) 0 0;
     transform: translateY(100%);
+    overscroll-behavior: contain;
 
-    &.open { transform: translateY(0); }
+    &.open {
+      transform: translateY(0);
+      touch-action: none;
+    }
   }
 
   .char-panel-header {

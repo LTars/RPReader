@@ -8,41 +8,50 @@ const CHAR_INDEX_URL = BASE_URL + 'data/characters/index.json';
 const PANEL_LINK_LABEL = 'Страница персонажа';
 const ALIASES_PREFIX   = 'также: ';
 const HOVER_DELAY_MS   = 1000;
-const HOVER_HIDE_MS    = 500;
+const HOVER_HIDE_MS    = 1000;
 const HIGHLIGHT_MS     = 1200;
+const FOCUS_CONTRACT_MS = 500;
+const FOCUS_HOLD_MS     = 1500;
+const FOCUS_FADE_MS     = 400;
+const SWIPE_VELOCITY    = 0.3;
+const SWIPE_DISTANCE    = 0.4;
 
 export class Characters {
   constructor() {
-    this.index   = [];      // [{id, names, file}]
-    this.cache   = {};      // id → full character data
-    this.nameMap = {};      // lowercase name → id
+    this.index   = [];
+    this.cache   = {};
+    this.nameMap = {};
     this._hoverTimer    = null;
     this._hideTimer     = null;
     this._lastVisited   = null;
-    this._panelCharId   = null;  // id персонажа в открытой панели
-    this._pendingCharId = null;  // id персонажа в процессе загрузки
+    this._panelCharId   = null;
+    this._pendingCharId = null;
+    this._tooltipCharId = null;
 
     this._tooltip      = document.getElementById('char-tooltip');
+    this._tooltipAvatar = document.getElementById('tooltip-avatar');
     this._panel        = document.getElementById('char-panel');
     this._panelName    = document.getElementById('char-panel-name');
     this._panelAliases = document.getElementById('char-panel-aliases');
     this._panelLink    = document.getElementById('char-panel-link');
     this._panelClose   = document.getElementById('char-panel-close');
+    this._focusOverlay = document.getElementById('return-focus-overlay');
 
     const linkLabel = document.getElementById('char-panel-link-label');
     if (linkLabel) linkLabel.textContent = PANEL_LINK_LABEL;
 
-    this._tooltip?.addEventListener('mouseenter', () => clearTimeout(this._hideTimer));
+    this._tooltip?.addEventListener('mouseenter', () => {
+      clearTimeout(this._hideTimer);
+    });
     this._tooltip?.addEventListener('mouseleave', () => {
       this._hideTimer = setTimeout(() => this._hideTooltip(), HOVER_HIDE_MS);
     });
+    this._tooltip?.addEventListener('click', () => this._onTooltipClick());
 
     this._panelClose?.addEventListener('click', () => this.closePanel());
 
-    // клик на линк внутри панели — перехватываем, навигация через _navigateToChar
     this._panelLink?.addEventListener('click', e => e.preventDefault());
 
-    // клик в любом месте панели (кроме кнопки закрытия) → переход на страницу персонажа
     this._panel?.addEventListener('click', e => {
       if (e.target.closest('#char-panel-close')) return;
       if (this._panelCharId) this._navigateToChar(this._panelCharId, this._lastVisited);
@@ -83,7 +92,6 @@ export class Characters {
 
   // ── bind hover to message bubbles for author tooltip ───
   bindBubbles(container) {
-    // Desktop only: pointer: fine (mouse, not touch)
     if (!window.matchMedia('(pointer: fine)').matches) return;
 
     container.querySelectorAll('.message-row[data-author-id]').forEach(row => {
@@ -101,7 +109,7 @@ export class Characters {
     if (!linkId) return;
     sessionStorage.removeItem('returnLinkId');
     const el = document.getElementById(linkId);
-    if (el) this._highlightElement(el);
+    if (el) this._animateFocusReturn(el);
   }
 
   _charId(el) {
@@ -150,23 +158,64 @@ export class Characters {
     this._tooltip.querySelector('.tooltip-aliases').textContent =
       aliases.length ? aliases.join(' · ') : '';
 
-    const rect = el.getBoundingClientRect();
-    let x = Math.min(rect.left, window.innerWidth - 260);
-    let y = rect.bottom + 8;
+    if (this._tooltipAvatar) {
+      this._tooltipAvatar.textContent = primary.charAt(0);
+    }
 
-    // If hovering over a bubble, position above it instead of below
-    if (el.classList.contains('bubble')) {
-      x = Math.min(rect.left, window.innerWidth - 260);
-      y = rect.top - 8;
+    this._tooltipCharId = id;
+
+    const rect = el.getBoundingClientRect();
+    const isBubble = el.classList.contains('bubble');
+    let x = Math.min(rect.left, window.innerWidth - 270);
+    let y;
+
+    if (isBubble) {
+      y = rect.top - 10;
+      this._tooltip.classList.add('above');
+    } else {
+      y = rect.bottom + 8;
+      this._tooltip.classList.remove('above');
     }
 
     this._tooltip.style.left = x + 'px';
     this._tooltip.style.top  = y + 'px';
+
+    if (isBubble) {
+      this._tooltip.style.transform = 'translateY(-100%)';
+    } else {
+      this._tooltip.style.transform = '';
+    }
+
     this._tooltip.classList.add('show');
   }
 
   _hideTooltip() {
     this._tooltip?.classList.remove('show');
+    this._tooltipCharId = null;
+  }
+
+  // ── tooltip click: panel or navigate ──────────────────
+  async _onTooltipClick() {
+    const id = this._tooltipCharId;
+    if (!id) return;
+
+    this._hideTooltip();
+
+    const panelActiveForThis =
+      this._panel?.classList.contains('open') && this._panelCharId === id;
+
+    if (panelActiveForThis) {
+      this._navigateToChar(id, this._lastVisited);
+      return;
+    }
+
+    this._pendingCharId = id;
+    const char = await this._loadChar(id);
+    if (!char) { this._pendingCharId = null; return; }
+
+    this._panelCharId = id;
+    this._pendingCharId = null;
+    this._openPanel(char);
   }
 
   // ── клик: первый → открыть панель, второй → перейти ──
@@ -200,19 +249,51 @@ export class Characters {
   // ── свайп-жесты для мобильной панели ─────────────────
   _initPanelSwipe() {
     if (!this._panel) return;
-    let startY = 0;
 
-    this._panel.addEventListener('touchstart', e => {
+    let startY = 0;
+    let startTime = 0;
+    let currentDeltaY = 0;
+    const panelEl = this._panel;
+
+    panelEl.addEventListener('touchstart', e => {
+      if (!panelEl.classList.contains('open')) return;
       startY = e.touches[0].clientY;
+      startTime = Date.now();
+      currentDeltaY = 0;
+      panelEl.classList.add('swiping');
     }, { passive: true });
 
-    this._panel.addEventListener('touchend', e => {
-      const deltaY = e.changedTouches[0].clientY - startY;
-      if (deltaY > 60) {
+    panelEl.addEventListener('touchmove', e => {
+      if (!panelEl.classList.contains('swiping')) return;
+      e.preventDefault();
+
+      const deltaY = e.touches[0].clientY - startY;
+      const panelHeight = panelEl.offsetHeight;
+      const maxUp = -panelHeight * 0.4;
+
+      currentDeltaY = deltaY > 0 ? deltaY : Math.max(deltaY, maxUp);
+      panelEl.style.transform = `translateY(${currentDeltaY}px)`;
+    }, { passive: false });
+
+    panelEl.addEventListener('touchend', () => {
+      if (!panelEl.classList.contains('swiping')) return;
+      panelEl.classList.remove('swiping');
+
+      const elapsed = Date.now() - startTime;
+      const velocity = currentDeltaY / Math.max(elapsed, 1);
+      const panelHeight = panelEl.offsetHeight;
+      const fraction = currentDeltaY / panelHeight;
+
+      panelEl.style.transform = '';
+
+      if (velocity > SWIPE_VELOCITY || fraction > SWIPE_DISTANCE) {
         this.closePanel();
-      } else if (deltaY < -60 && this._panelCharId) {
-        this._navigateToChar(this._panelCharId, this._lastVisited);
+      } else if (velocity < -SWIPE_VELOCITY || fraction < -0.3) {
+        if (this._panelCharId) {
+          this._navigateToChar(this._panelCharId, this._lastVisited);
+        }
       }
+      // else snap back (transform already cleared)
     }, { passive: true });
   }
 
@@ -249,6 +330,47 @@ export class Characters {
     el.classList.add('highlighted');
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(() => el.classList.remove('highlighted'), HIGHLIGHT_MS);
+  }
+
+  // ── contracting focus return animation ────────────────
+  _animateFocusReturn(el) {
+    const overlay = this._focusOverlay;
+    if (!overlay) {
+      this._highlightElement(el);
+      return;
+    }
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    setTimeout(() => {
+      const rect = el.getBoundingClientRect();
+      const t = rect.top;
+      const r = window.innerWidth - rect.right;
+      const b = window.innerHeight - rect.bottom;
+      const l = rect.left;
+
+      const anim = overlay.animate([
+        { clipPath: 'inset(0px)', opacity: 0 },
+        { clipPath: `inset(${t}px ${r}px ${b}px ${l}px)`, opacity: 1 }
+      ], {
+        duration: FOCUS_CONTRACT_MS,
+        easing: 'ease-in',
+        fill: 'forwards'
+      });
+
+      anim.onfinish = () => {
+        setTimeout(() => {
+          overlay.animate([
+            { opacity: 1 },
+            { opacity: 0 }
+          ], {
+            duration: FOCUS_FADE_MS,
+            easing: 'ease-out',
+            fill: 'forwards'
+          });
+        }, FOCUS_HOLD_MS);
+      };
+    }, 400);
   }
 
   // ── load character data on demand ────────────────────
