@@ -124,6 +124,10 @@ export class Characters {
     const id = this._charId(el);
     clearTimeout(this._hoverTimer);
     clearTimeout(this._hideTimer);
+
+    // тултип уже виден для этого персонажа — держим без задержки
+    if (this._tooltipCharId === id && this._tooltip?.classList.contains('show')) return;
+
     this._hoverTimer = setTimeout(() => this._showTooltip(id, el), HOVER_DELAY_MS);
   }
 
@@ -139,6 +143,8 @@ export class Characters {
 
     clearTimeout(this._hoverTimer);
     clearTimeout(this._hideTimer);
+
+    if (this._tooltipCharId === authorId && this._tooltip?.classList.contains('show')) return;
 
     const bubble = row.querySelector('.bubble');
     this._hoverTimer = setTimeout(() => this._showTooltip(authorId, bubble), HOVER_DELAY_MS);
@@ -190,7 +196,12 @@ export class Characters {
   }
 
   _hideTooltip() {
-    this._tooltip?.classList.remove('show');
+    // мышь всё ещё на тултипе — не скрываем, перезапускаем таймер
+    if (this._tooltip?.matches(':hover')) {
+      this._hideTimer = setTimeout(() => this._hideTooltip(), HOVER_HIDE_MS);
+      return;
+    }
+    this._tooltip?.classList.remove('show', 'above');
     this._tooltipCharId = null;
   }
 
