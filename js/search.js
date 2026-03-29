@@ -10,6 +10,9 @@ export class Search {
     this._overlay = document.getElementById('search-overlay');
     this._input   = document.getElementById('search-input');
     this._results = document.getElementById('search-results');
+    this._index   = {};
+
+    this._buildIndex();
 
     this._input?.addEventListener('input', () => this._run());
     this._overlay?.addEventListener('click', e => {
@@ -32,15 +35,56 @@ export class Search {
     if (this._results) this._results.innerHTML = '';
   }
 
+  _buildIndex() {
+    // Build inverted index of 2-4 char substrings for O(1) lookups
+    for (let blockIdx = 0; blockIdx < this.blocks.length; blockIdx++) {
+      const block = this.blocks[blockIdx];
+      if (block.type !== 'message') continue;
+
+      const text = block.content.toLowerCase();
+
+      // Index 2-4 char substrings
+      for (let len = 2; len <= 4; len++) {
+        for (let i = 0; i <= text.length - len; i++) {
+          const substr = text.slice(i, i + len);
+          if (!this._index[substr]) {
+            this._index[substr] = [];
+          }
+          // Track which blocks and positions contain this substring
+          let entry = this._index[substr].find(e => e.blockIdx === blockIdx);
+          if (!entry) {
+            entry = { blockIdx, positions: [] };
+            this._index[substr].push(entry);
+          }
+          if (!entry.positions.includes(i)) {
+            entry.positions.push(i);
+          }
+        }
+      }
+    }
+  }
+
   _run() {
     const q = this._input?.value.trim().toLowerCase();
     if (!q || q.length < MIN_QUERY_LENGTH) { this._results.innerHTML = ''; return; }
 
     const hits = [];
-    for (const block of this.blocks) {
-      if (block.type !== 'message') continue;
-      const idx = block.content.toLowerCase().indexOf(q);
-      if (idx === -1) continue;
+    const seenBlocks = new Set();
+
+    // Use index for O(1) lookup: use first 4 chars (or less if query is shorter) as key
+    const indexKey = q.slice(0, Math.min(4, q.length));
+    const matchingEntries = this._index[indexKey] || [];
+
+    // For each block that contains the index key, verify full query and extract snippet
+    for (const entry of matchingEntries) {
+      const block = this.blocks[entry.blockIdx];
+      if (seenBlocks.has(block.anchor)) continue;
+
+      const content = block.content.toLowerCase();
+      const idx = content.indexOf(q);
+      if (idx === -1) continue;  // Index key found but full query not matched
+
+      seenBlocks.add(block.anchor);
 
       const start = Math.max(0, idx - SNIPPET_CONTEXT);
       const end   = Math.min(block.content.length, idx + q.length + SNIPPET_CONTEXT);

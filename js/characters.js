@@ -68,24 +68,6 @@ export class Characters {
     }
   }
 
-  // ── wrap character names in text ─────────────────────
-  // Returns HTML string with <span class="char-link"> around known names
-  wrapNames(text) {
-    if (!text) return text;
-
-    const names = Object.keys(this.nameMap).sort((a, b) => b.length - a.length);
-    if (!names.length) return text;
-
-    const escaped = names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    const rx = new RegExp(`(${escaped.join('|')})`, 'gi');
-
-    return text.replace(rx, match => {
-      const id = this.nameMap[match.toLowerCase()];
-      if (!id) return match;
-      return `<span class="char-link" data-char-id="${id}" tabindex="0">${match}</span>`;
-    });
-  }
-
   // ── bind events to rendered char-links ───────────────
   bindLinks(container) {
     container.querySelectorAll('.char-link').forEach((el, i) => {
@@ -96,6 +78,20 @@ export class Characters {
       el.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') this._onClick(e);
       });
+    });
+  }
+
+  // ── bind hover to message bubbles for author tooltip ───
+  bindBubbles(container) {
+    // Desktop only: pointer: fine (mouse, not touch)
+    if (!window.matchMedia('(pointer: fine)').matches) return;
+
+    container.querySelectorAll('.message-row[data-author-id]').forEach(row => {
+      const bubble = row.querySelector('.bubble');
+      if (!bubble) return;
+
+      bubble.addEventListener('mouseenter', () => this._onBubbleHover(row));
+      bubble.addEventListener('mouseleave', () => this._onBubbleHoverEnd());
     });
   }
 
@@ -128,6 +124,23 @@ export class Characters {
     this._hideTimer = setTimeout(() => this._hideTooltip(), HOVER_HIDE_MS);
   }
 
+  // ── bubble hover ──────────────────────────────────────
+  _onBubbleHover(row) {
+    const authorId = row.dataset.authorId;
+    if (!authorId) return;
+
+    clearTimeout(this._hoverTimer);
+    clearTimeout(this._hideTimer);
+
+    const bubble = row.querySelector('.bubble');
+    this._hoverTimer = setTimeout(() => this._showTooltip(authorId, bubble), HOVER_DELAY_MS);
+  }
+
+  _onBubbleHoverEnd() {
+    clearTimeout(this._hoverTimer);
+    this._hideTimer = setTimeout(() => this._hideTooltip(), HOVER_HIDE_MS);
+  }
+
   _showTooltip(id, el) {
     const entry = this.index.find(c => c.id === id);
     if (!entry || !this._tooltip) return;
@@ -138,8 +151,15 @@ export class Characters {
       aliases.length ? aliases.join(' · ') : '';
 
     const rect = el.getBoundingClientRect();
-    const x = Math.min(rect.left, window.innerWidth - 260);
-    const y = rect.bottom + 8;
+    let x = Math.min(rect.left, window.innerWidth - 260);
+    let y = rect.bottom + 8;
+
+    // If hovering over a bubble, position above it instead of below
+    if (el.classList.contains('bubble')) {
+      x = Math.min(rect.left, window.innerWidth - 260);
+      y = rect.top - 8;
+    }
+
     this._tooltip.style.left = x + 'px';
     this._tooltip.style.top  = y + 'px';
     this._tooltip.classList.add('show');

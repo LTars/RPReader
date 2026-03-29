@@ -112,6 +112,7 @@ class Reader {
     }
 
     this.characters.bindLinks(chat);
+    this.characters.bindBubbles(chat);
     this.characters.checkReturnHighlight();
     this.search = new Search(this.blocks);
   }
@@ -135,6 +136,7 @@ class Reader {
     const row = document.createElement('div');
     row.className = `message-row ${block.side}`;
     row.id = block.anchor;
+    row.dataset.authorId = block.authorId;
 
     const avatar = document.createElement('div');
     avatar.className = 'avatar placeholder';
