@@ -28,6 +28,7 @@
    - Only after ExitPlanMode approval
    - Use Edit/Write for code changes, not Bash for file operations
    - Commit only when explicitly asked
+   - After any non-trivial implementation, propose a commit message (conventional commits format)
 
 **File reading at any phase:**
 - Always delegate to Lib agent (Claude/librarian.md)

@@ -232,6 +232,20 @@ class Reader {
     this._pendingDivider        = null;
     this._pendingDividerAuthorId = null;
 
+    // Strip leading divider if it should extend the previous bubble
+    // (happens when a batch boundary falls right after a same-author message)
+    let leadingDivider = null;
+    if (
+      !prevPending &&
+      newBlocks.length > 1 &&
+      newBlocks[0].type === 'divider' &&
+      newBlocks[1].type === 'message' &&
+      newBlocks[1].authorId === this._lastRenderedAuthorId &&
+      this._lastBubbleEl
+    ) {
+      leadingDivider = newBlocks.shift();
+    }
+
     const merged = this._mergeBlocks(newBlocks);
 
     const fragment = document.createDocumentFragment();
@@ -246,6 +260,16 @@ class Reader {
         merged.shift();
       } else {
         fragment.appendChild(this._makeDivider(prevPending));
+        this._lastRenderedAuthorId = null;
+        this._lastRenderedSide     = null;
+        this._lastBubbleEl         = null;
+      }
+    } else if (leadingDivider) {
+      if (merged.length > 0 && merged[0].type === 'message') {
+        this._extendLastBubble(merged[0].content);
+        merged.shift();
+      } else {
+        fragment.appendChild(this._makeDivider(leadingDivider));
         this._lastRenderedAuthorId = null;
         this._lastRenderedSide     = null;
         this._lastBubbleEl         = null;
@@ -338,11 +362,25 @@ class Reader {
   }
 
   // Wrap speech segments in <span class="dialogue">.
-  // Detects: line-starting dashes and inline dashes after punctuation.
+  //
+  // Zaveta format: -text (hyphen immediately before text, no space)
+  //   → whole line is dialogue, ends at line break.
+  //   TODO: add cleanup rules in the formatter for this format.
+  //
+  // Standard (Tars) format: "- " at line start or after [,.!?]
+  //   → detects inline dialogue separated by punctuation.
+  //   Segments end at next [,.!?]"- " boundary or end of string.
+  //   Attribution ("- сказал он") gets the same style — unavoidable without NLP.
   _markDialogue(text) {
+    // Zaveta: starts with -NonSpace (no space after hyphen)
+    if (/^-\S/.test(text)) {
+      return `<span class="dialogue">${text}</span>`;
+    }
+    // Standard: "- " at line-start or after punctuation only
+    // Does NOT match: mid-text dashes (слово-слово, слово — слово without preceding [,.!?])
     return text.replace(
-      /([-\u2013\u2014]\s+)((?:(?![,.!?]\s*[-\u2013\u2014]).)*)/g,
-      '<span class="dialogue">$1$2</span>'
+      /(^|[,.!?]\s*)(- (?:(?![,.!?]\s*- ).)*)/g,
+      '$1<span class="dialogue">$2</span>'
     );
   }
 
