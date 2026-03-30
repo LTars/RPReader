@@ -1,9 +1,12 @@
 import { Characters }  from './characters.js';
 import { Search }      from './search.js';
 
-const BASE_URL        = new URL('../', import.meta.url).href;
-const BLOCKS_URL      = BASE_URL + 'content/blocks/';
+const BASE_URL         = new URL('../', import.meta.url).href;
+const BLOCKS_URL       = BASE_URL + 'content/blocks/';
 const PARSER_RULES_URL = BASE_URL + 'data/parser-rules.json';
+
+const LOD_BATCH_SIZE = 20;
+const LOD_MARGIN     = '600px';
 
 function parseBlock(text, filename) {
   const fmMatch = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
@@ -45,6 +48,13 @@ class Reader {
     this.search     = null;
     this.blocks     = [];
 
+    this._filenames  = [];
+    this._loadedCount = 0;
+    this._lodObserver = null;
+    this._lodSentinel = null;
+    this._lastRenderedAuthorId = null;
+    this._lastRenderedSide     = null;
+
     this._progressFill = document.getElementById('progress-fill');
     this._progressText = document.getElementById('progress-text');
   }
@@ -71,16 +81,23 @@ class Reader {
   async _loadContent() {
     const indexResp = await fetch(BLOCKS_URL + 'index.json');
     if (!indexResp.ok) throw new Error('Blocks index load failed');
-    const filenames = await indexResp.json();
+    this._filenames = await indexResp.json();
+    await this._fetchBatch(0, LOD_BATCH_SIZE);
+  }
 
-    const blocks = new Array(filenames.length);
-    await Promise.all(filenames.map(async (filename, i) => {
+  async _fetchBatch(from, count) {
+    const slice = this._filenames.slice(from, from + count);
+    if (!slice.length) return;
+
+    const loaded = new Array(slice.length);
+    await Promise.all(slice.map(async (filename, i) => {
       const resp = await fetch(BLOCKS_URL + filename);
       if (!resp.ok) throw new Error(`Block load failed: ${filename}`);
-      blocks[i] = parseBlock(await resp.text(), filename);
+      loaded[i] = parseBlock(await resp.text(), filename);
     }));
 
-    this.blocks = blocks.filter(Boolean);
+    this.blocks.push(...loaded.filter(Boolean));
+    this._loadedCount = from + slice.length;
   }
 
   // ── render ───────────────────────────────────────────
@@ -88,33 +105,130 @@ class Reader {
     const chat = document.getElementById('chat');
     if (!chat) return;
 
-    let lastAuthorId = null;
-    let lastSide     = null;
+    const fragment = document.createDocumentFragment();
+    this._renderBlocks(this._mergeBlocks(this.blocks), fragment);
+    this.characters.bindLinks(fragment);
+    this.characters.bindBubbles(fragment);
+    chat.appendChild(fragment);
 
-    for (const block of this.blocks) {
+    this.characters.checkReturnHighlight();
+    this.search = new Search(this.blocks);
+
+    if (this._loadedCount < this._filenames.length) {
+      this._setupLOD(chat);
+    }
+  }
+
+  _renderBlocks(blocks, container) {
+    for (const block of blocks) {
       if (block.type === 'divider') {
-        chat.appendChild(this._makeDivider(block));
-        lastAuthorId = null;
+        container.appendChild(this._makeDivider(block));
+        this._lastRenderedAuthorId = null;
+        this._lastRenderedSide     = null;
         continue;
       }
       if (block.type !== 'message') continue;
 
-      const showHeader = block.authorId !== lastAuthorId || block.side !== lastSide;
+      const showHeader = block.authorId !== this._lastRenderedAuthorId
+        || block.side !== this._lastRenderedSide;
 
       if (showHeader) {
-        chat.appendChild(this._makeHeader(block));
+        container.appendChild(this._makeHeader(block));
       }
 
-      chat.appendChild(this._makeMessage(block, showHeader));
+      container.appendChild(this._makeMessage(block, showHeader));
 
-      lastAuthorId = block.authorId;
-      lastSide     = block.side;
+      this._lastRenderedAuthorId = block.authorId;
+      this._lastRenderedSide     = block.side;
+    }
+  }
+
+  // merge [msg_A, divider, msg_A, ...] chains into single blocks with *** separator
+  _mergeBlocks(blocks) {
+    const result = [];
+    let i = 0;
+
+    while (i < blocks.length) {
+      const block = blocks[i];
+
+      if (block.type !== 'message') {
+        result.push(block);
+        i++;
+        continue;
+      }
+
+      const parts = [block.content];
+      let j = i + 1;
+
+      while (
+        j < blocks.length - 1 &&
+        blocks[j].type === 'divider' &&
+        blocks[j + 1].type === 'message' &&
+        blocks[j + 1].authorId === block.authorId
+      ) {
+        parts.push('***');
+        parts.push(blocks[j + 1].content);
+        j += 2;
+      }
+
+      result.push(parts.length > 1
+        ? { ...block, content: parts.join('\n') }
+        : block
+      );
+      i = j;
     }
 
-    this.characters.bindLinks(chat);
-    this.characters.bindBubbles(chat);
-    this.characters.checkReturnHighlight();
+    return result;
+  }
+
+  _setupLOD(chat) {
+    this._lodSentinel = document.createElement('div');
+    this._lodSentinel.className = 'lod-sentinel';
+    chat.appendChild(this._lodSentinel);
+
+    this._lodObserver = new IntersectionObserver(
+      entries => { if (entries[0].isIntersecting) this._loadNextBatch(); },
+      { rootMargin: LOD_MARGIN }
+    );
+    this._lodObserver.observe(this._lodSentinel);
+  }
+
+  async _loadNextBatch() {
+    if (this._loadedCount >= this._filenames.length) {
+      this._teardownLOD();
+      return;
+    }
+
+    this._lodObserver.disconnect();
+
+    const prevCount = this.blocks.length;
+    await this._fetchBatch(this._loadedCount, LOD_BATCH_SIZE);
+    const newBlocks = this.blocks.slice(prevCount);
+
+    const chat = document.getElementById('chat');
+    this._lodSentinel.remove();
+
+    const fragment = document.createDocumentFragment();
+    this._renderBlocks(this._mergeBlocks(newBlocks), fragment);
+    this.characters.bindLinks(fragment);
+    this.characters.bindBubbles(fragment);
+    chat.appendChild(fragment);
+
     this.search = new Search(this.blocks);
+
+    if (this._loadedCount < this._filenames.length) {
+      chat.appendChild(this._lodSentinel);
+      this._lodObserver.observe(this._lodSentinel);
+    } else {
+      this._teardownLOD();
+    }
+  }
+
+  _teardownLOD() {
+    this._lodObserver?.disconnect();
+    this._lodSentinel?.remove();
+    this._lodObserver = null;
+    this._lodSentinel = null;
   }
 
   _makeHeader(block) {
@@ -149,6 +263,7 @@ class Reader {
     const processedLines = lines.map(line => {
       const trimmed = line.trim();
       if (!trimmed) return '';
+      if (trimmed === '***') return '<div class="bubble-divider"><span>✦</span></div>';
       const cls = /^[-–—]/.test(trimmed) ? ' class="dialogue"' : '';
       return `<p${cls}>${trimmed}</p>`;
     });

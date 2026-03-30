@@ -38,7 +38,7 @@ if (id) {
   loadChar(id);
 } else {
   if (backLink) {
-    backLink.href        = BASE_URL + 'index.html';
+    backLink.href        = BASE_URL + 'reader.html';
     backLink.textContent = UI.BACK_READER;
   }
   loadLibrary();

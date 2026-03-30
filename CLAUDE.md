@@ -110,6 +110,7 @@ Claude/                   — workflow definitions and agent roles
 - ES modules (`import`/`export`), no bundler
 - Modern browsers only — no polyfills
 - Errors: log or show to user, never swallow silently
+- Magic numbers: extract to named `UPPER_SNAKE_CASE` constants
 
 ### File assembly order (JS)
 ```
@@ -169,7 +170,33 @@ Claude/                   — workflow definitions and agent roles
 - Deploy: standard GitHub Pages directly from main branch
 - URL: https://ltars.github.io/RPReader/
 
+## Session Logging
+
+At the start of each session, create a log file at `Claude/sessions/YYYY-MM-DD-NNN.md` (NNN = sequential number for the day).
+
+### Session open
+1. Read `Claude/TASKBOARD.md` to pick up current state
+2. Read `Claude/STATUS.md` for blockers and active work
+3. Create session log with **Goals** for this session
+
+### During session
+- After each completed step — add a row to the log: step | status | notes
+- **Log immediately**: every result-producing action must be logged right after completion
+- Session must be closable at any point without a separate logging request
+
+### Session close
+1. Update `Claude/TASKBOARD.md` — mark completed `[x]`, partial `[~]`, blocked `[-]`
+2. Update `Claude/STATUS.md` — refresh "Currently Working" and "Blockers"
+3. Final log entry: "Session closed"
+4. **Notes section** (Russian) — blockers, decisions, deferred items, or "Блокеров нет"
+
+### Log language
+- Goals, step table: English
+- Notes section: Russian
+
 ## Roadmap
+
+Full task board: `Claude/TASKBOARD.md`
 
 Planned features (from design phase, not yet implemented):
 

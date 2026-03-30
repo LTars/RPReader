@@ -241,6 +241,26 @@
   font-style: italic;
 }
 
+/* ── bubble divider (*** inside same-author bubble) ── */
+.bubble-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-subtle);
+    opacity: 0.5;
+  }
+}
+
 /* ── scene divider ── */
 .scene-divider {
   display: flex;
