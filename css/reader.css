@@ -179,11 +179,10 @@
   &.left .author-name { color: var(--author-left); }
 }
 
-.message-row {
+.message-group {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 10px;
-  margin-bottom: 2px;
 
   &.right {
     flex-direction: row-reverse;
@@ -198,6 +197,24 @@
     background: var(--bubble-left);
     border-bottom-left-radius: 4px;
   }
+
+  & .avatar {
+    position: sticky;
+    bottom: 8px;
+    align-self: flex-end;
+  }
+}
+
+.bubbles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.message-row {
+  margin-bottom: 2px;
 }
 
 .avatar {

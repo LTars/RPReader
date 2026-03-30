@@ -59,6 +59,9 @@ class Reader {
     this._pendingDividerAuthorId = null;
     this._lastBubbleEl          = null;
 
+    this._currentGroupEl        = null;
+    this._currentBubblesEl      = null;
+
     this._progressFill = document.getElementById('progress-fill');
     this._progressText = document.getElementById('progress-text');
   }
@@ -134,18 +137,24 @@ class Reader {
         this._lastRenderedAuthorId = null;
         this._lastRenderedSide     = null;
         this._lastBubbleEl         = null;
+        this._currentGroupEl       = null;
+        this._currentBubblesEl     = null;
         continue;
       }
       if (block.type !== 'message') continue;
 
-      const showHeader = block.authorId !== this._lastRenderedAuthorId
+      const newGroup = block.authorId !== this._lastRenderedAuthorId
         || block.side !== this._lastRenderedSide;
 
-      if (showHeader) {
+      if (newGroup) {
         container.appendChild(this._makeHeader(block));
+        const { group, bubbles } = this._makeGroup(block);
+        container.appendChild(group);
+        this._currentGroupEl   = group;
+        this._currentBubblesEl = bubbles;
       }
 
-      container.appendChild(this._makeMessage(block, showHeader));
+      this._currentBubblesEl.appendChild(this._makeMessage(block));
 
       this._lastRenderedAuthorId = block.authorId;
       this._lastRenderedSide     = block.side;
@@ -263,6 +272,8 @@ class Reader {
         this._lastRenderedAuthorId = null;
         this._lastRenderedSide     = null;
         this._lastBubbleEl         = null;
+        this._currentGroupEl       = null;
+        this._currentBubblesEl     = null;
       }
     } else if (leadingDivider) {
       if (merged.length > 0 && merged[0].type === 'message') {
@@ -273,6 +284,8 @@ class Reader {
         this._lastRenderedAuthorId = null;
         this._lastRenderedSide     = null;
         this._lastBubbleEl         = null;
+        this._currentGroupEl       = null;
+        this._currentBubblesEl     = null;
       }
     }
 
@@ -305,6 +318,22 @@ class Reader {
     this._lodSentinel = null;
   }
 
+  _makeGroup(block) {
+    const group = document.createElement('div');
+    group.className = `message-group ${block.side}`;
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar placeholder';
+    avatar.textContent = (block.authorId || '?')[0].toUpperCase();
+
+    const bubbles = document.createElement('div');
+    bubbles.className = 'bubbles';
+
+    group.appendChild(avatar);
+    group.appendChild(bubbles);
+    return { group, bubbles };
+  }
+
   _makeHeader(block) {
     const div = document.createElement('div');
     div.className = `author-header ${block.side}`;
@@ -320,15 +349,11 @@ class Reader {
     return div;
   }
 
-  _makeMessage(block, _showHeader) {
+  _makeMessage(block) {
     const row = document.createElement('div');
     row.className = `message-row ${block.side}`;
     row.id = block.anchor;
     row.dataset.authorId = block.authorId;
-
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar placeholder';
-    avatar.textContent = (block.authorId || '?')[0].toUpperCase();
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
@@ -336,7 +361,6 @@ class Reader {
 
     this._lastBubbleEl = bubble;
 
-    row.appendChild(avatar);
     row.appendChild(bubble);
     return row;
   }
@@ -363,32 +387,26 @@ class Reader {
 
   // Wrap speech segments in <span class="dialogue">.
   //
-  // Zaveta format: -text (hyphen immediately before text, no space)
-  //   → whole line is dialogue, ends at line break.
-  //   TODO: add cleanup rules in the formatter for this format.
-  //
-  // Standard (Tars) format: "- " at line start or after [,.!?]
-  //   → detects inline dialogue separated by punctuation.
-  //   Segments end at next [,.!?]"- " boundary or end of string.
-  //   Attribution ("- сказал он") gets the same style — unavoidable without NLP.
+  // Dialogue line: starts with optional whitespace + dash (with or without space after).
+  // State machine: SPEECH → [,.!?]\s*- → AUTHOR → [,.!?]\s*- → SPEECH → ...
+  // Odd-indexed parts (0, 2, 4...) = speech, even (1, 3...) = attribution — plain text.
   _markDialogue(text) {
-    // Zaveta: starts with -NonSpace (no space after hyphen)
-    if (/^-\S/.test(text)) {
-      return `<span class="dialogue">${text}</span>`;
+    if (!/^\s*-/.test(text)) return text;
+
+    const parts = [];
+    let pos = 0;
+    const rx = /[,.!?]\s*(?=-)/g;
+    let m;
+
+    while ((m = rx.exec(text)) !== null) {
+      parts.push(text.slice(pos, m.index + m[0].length));
+      pos = m.index + m[0].length;
     }
-    // Standard (Tars) format — two passes:
-    // Pass 1: "- " at line-start or after [.!?] (any case — Я false positive unavoidable)
-    // Pass 2: "- " after "," uppercase only — ", - с нескрываемым" (lowercase) = attribution, skip
-    // Known limitation: ", - как ваши дела?" (lowercase dialogue after comma) not detected.
-    let result = text.replace(
-      /(^|[.!?]\s*)(- (?:(?![,.!?]\s*- ).)*)/g,
-      '$1<span class="dialogue">$2</span>'
-    );
-    result = result.replace(
-      /([,]\s*)(- [А-ЯЁA-Z](?:(?![,.!?]\s*- ).)*)/g,
-      '$1<span class="dialogue">$2</span>'
-    );
-    return result;
+    parts.push(text.slice(pos));
+
+    return parts.map((part, i) =>
+      i % 2 === 0 ? `<span class="dialogue">${part}</span>` : part
+    ).join('');
   }
 
   // Extend an already-rendered bubble with a bubble-divider and new content.
