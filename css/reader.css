@@ -237,7 +237,7 @@
 }
 
 .dialogue {
-  color: var(--text-dim);
+  color: var(--dialogue);
   font-style: italic;
 }
 
@@ -247,7 +247,7 @@
   align-items: center;
   gap: 10px;
   margin: 12px 0;
-  color: var(--text-muted);
+  color: var(--text-dim);
   font-size: 11px;
   letter-spacing: 0.2em;
 
@@ -256,8 +256,7 @@
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--border-subtle);
-    opacity: 0.5;
+    background: var(--border);
   }
 }
 
@@ -267,7 +266,7 @@
   align-items: center;
   gap: 16px;
   margin: 36px 0;
-  color: var(--text-muted);
+  color: var(--text-dim);
   font-size: 13px;
   letter-spacing: 0.2em;
 
@@ -276,7 +275,7 @@
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--border-subtle);
+    background: var(--border);
   }
 }
 

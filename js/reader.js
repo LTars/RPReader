@@ -5,8 +5,8 @@ const BASE_URL         = new URL('../', import.meta.url).href;
 const BLOCKS_URL       = BASE_URL + 'content/blocks/';
 const PARSER_RULES_URL = BASE_URL + 'data/parser-rules.json';
 
-const LOD_BATCH_SIZE = 20;
-const LOD_MARGIN     = '600px';
+const LOD_BATCH_SIZE   = 5;
+const LOD_SCREENS_AHEAD = 3;
 
 function parseBlock(text, filename) {
   const fmMatch = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
@@ -54,6 +54,10 @@ class Reader {
     this._lodSentinel = null;
     this._lastRenderedAuthorId = null;
     this._lastRenderedSide     = null;
+
+    this._pendingDivider        = null;
+    this._pendingDividerAuthorId = null;
+    this._lastBubbleEl          = null;
 
     this._progressFill = document.getElementById('progress-fill');
     this._progressText = document.getElementById('progress-text');
@@ -116,6 +120,10 @@ class Reader {
 
     if (this._loadedCount < this._filenames.length) {
       this._setupLOD(chat);
+    } else if (this._pendingDivider) {
+      chat.appendChild(this._makeDivider(this._pendingDivider));
+      this._pendingDivider = null;
+      this._pendingDividerAuthorId = null;
     }
   }
 
@@ -125,6 +133,7 @@ class Reader {
         container.appendChild(this._makeDivider(block));
         this._lastRenderedAuthorId = null;
         this._lastRenderedSide     = null;
+        this._lastBubbleEl         = null;
         continue;
       }
       if (block.type !== 'message') continue;
@@ -144,9 +153,11 @@ class Reader {
   }
 
   // merge [msg_A, divider, msg_A, ...] chains into single blocks with *** separator
+  // trailing dividers are deferred as _pendingDivider for cross-batch handling
   _mergeBlocks(blocks) {
     const result = [];
     let i = 0;
+    let lastMsgAuthorId = null;
 
     while (i < blocks.length) {
       const block = blocks[i];
@@ -171,11 +182,18 @@ class Reader {
         j += 2;
       }
 
-      result.push(parts.length > 1
+      const merged = parts.length > 1
         ? { ...block, content: parts.join('\n') }
-        : block
-      );
+        : block;
+      result.push(merged);
+      lastMsgAuthorId = block.authorId;
       i = j;
+    }
+
+    // Defer trailing divider — it may be a cross-batch bubble-divider
+    if (result.length > 0 && result[result.length - 1].type === 'divider') {
+      this._pendingDivider        = result.pop();
+      this._pendingDividerAuthorId = lastMsgAuthorId;
     }
 
     return result;
@@ -186,9 +204,10 @@ class Reader {
     this._lodSentinel.className = 'lod-sentinel';
     chat.appendChild(this._lodSentinel);
 
+    const margin = Math.round(window.innerHeight * LOD_SCREENS_AHEAD);
     this._lodObserver = new IntersectionObserver(
       entries => { if (entries[0].isIntersecting) this._loadNextBatch(); },
-      { rootMargin: LOD_MARGIN }
+      { rootMargin: `${margin}px` }
     );
     this._lodObserver.observe(this._lodSentinel);
   }
@@ -208,8 +227,32 @@ class Reader {
     const chat = document.getElementById('chat');
     this._lodSentinel.remove();
 
+    const prevPending        = this._pendingDivider;
+    const prevPendingAuthorId = this._pendingDividerAuthorId;
+    this._pendingDivider        = null;
+    this._pendingDividerAuthorId = null;
+
+    const merged = this._mergeBlocks(newBlocks);
+
     const fragment = document.createDocumentFragment();
-    this._renderBlocks(this._mergeBlocks(newBlocks), fragment);
+
+    if (prevPending) {
+      if (
+        merged.length > 0 &&
+        merged[0].type === 'message' &&
+        merged[0].authorId === prevPendingAuthorId
+      ) {
+        this._extendLastBubble(merged[0].content);
+        merged.shift();
+      } else {
+        fragment.appendChild(this._makeDivider(prevPending));
+        this._lastRenderedAuthorId = null;
+        this._lastRenderedSide     = null;
+        this._lastBubbleEl         = null;
+      }
+    }
+
+    this._renderBlocks(merged, fragment);
     this.characters.bindLinks(fragment);
     this.characters.bindBubbles(fragment);
     chat.appendChild(fragment);
@@ -225,6 +268,13 @@ class Reader {
   }
 
   _teardownLOD() {
+    if (this._pendingDivider) {
+      const chat = document.getElementById('chat');
+      if (chat) chat.appendChild(this._makeDivider(this._pendingDivider));
+      this._pendingDivider        = null;
+      this._pendingDividerAuthorId = null;
+      this._lastBubbleEl           = null;
+    }
     this._lodObserver?.disconnect();
     this._lodSentinel?.remove();
     this._lodObserver = null;
@@ -258,17 +308,10 @@ class Reader {
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
+    bubble.innerHTML = this._renderContentLines(block.content);
 
-    const lines = block.content.split('\n');
-    const processedLines = lines.map(line => {
-      const trimmed = line.trim();
-      if (!trimmed) return '';
-      if (trimmed === '***') return '<div class="bubble-divider"><span>✦</span></div>';
-      const cls = /^[-–—]/.test(trimmed) ? ' class="dialogue"' : '';
-      return `<p${cls}>${trimmed}</p>`;
-    });
+    this._lastBubbleEl = bubble;
 
-    bubble.innerHTML = processedLines.filter(Boolean).join('');
     row.appendChild(avatar);
     row.appendChild(bubble);
     return row;
@@ -280,6 +323,38 @@ class Reader {
     div.id = block.anchor;
     div.innerHTML = '<span>✦</span>';
     return div;
+  }
+
+  _renderContentLines(content) {
+    return content.split('\n')
+      .map(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return '';
+        if (trimmed === '***') return '<div class="bubble-divider"><span>✦</span></div>';
+        return `<p>${this._markDialogue(trimmed)}</p>`;
+      })
+      .filter(Boolean)
+      .join('');
+  }
+
+  // Wrap speech segments in <span class="dialogue">.
+  // Detects: line-starting dashes and inline dashes after punctuation.
+  _markDialogue(text) {
+    return text.replace(
+      /([-\u2013\u2014]\s+)((?:(?![,.!?]\s*[-\u2013\u2014]).)*)/g,
+      '<span class="dialogue">$1$2</span>'
+    );
+  }
+
+  // Extend an already-rendered bubble with a bubble-divider and new content.
+  _extendLastBubble(content) {
+    if (!this._lastBubbleEl) return;
+    this._lastBubbleEl.insertAdjacentHTML(
+      'beforeend',
+      '<div class="bubble-divider"><span>✦</span></div>' + this._renderContentLines(content)
+    );
+    this.characters.bindLinks(this._lastBubbleEl);
+    this.characters.bindBubbles(this._lastBubbleEl);
   }
 
   // ── UI bindings ──────────────────────────────────────

@@ -6,7 +6,7 @@
 ## Backlog
 
 ### Content & Navigation
-- [ ] LOD content loading — lazy load blocks to avoid browser lag on large texts
+- [x] LOD content loading — lazy load blocks to avoid browser lag on large texts
 - [ ] Content deduplication in processing pipeline
 - [ ] Scene timeline
 - [ ] Search filters by context (text / characters / comments)
