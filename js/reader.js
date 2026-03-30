@@ -376,12 +376,19 @@ class Reader {
     if (/^-\S/.test(text)) {
       return `<span class="dialogue">${text}</span>`;
     }
-    // Standard: "- " at line-start or after punctuation only
-    // Does NOT match: mid-text dashes (слово-слово, слово — слово without preceding [,.!?])
-    return text.replace(
-      /(^|[,.!?]\s*)(- (?:(?![,.!?]\s*- ).)*)/g,
+    // Standard (Tars) format — two passes:
+    // Pass 1: "- " at line-start or after [.!?] (any case — Я false positive unavoidable)
+    // Pass 2: "- " after "," uppercase only — ", - с нескрываемым" (lowercase) = attribution, skip
+    // Known limitation: ", - как ваши дела?" (lowercase dialogue after comma) not detected.
+    let result = text.replace(
+      /(^|[.!?]\s*)(- (?:(?![,.!?]\s*- ).)*)/g,
       '$1<span class="dialogue">$2</span>'
     );
+    result = result.replace(
+      /([,]\s*)(- [А-ЯЁA-Z](?:(?![,.!?]\s*- ).)*)/g,
+      '$1<span class="dialogue">$2</span>'
+    );
+    return result;
   }
 
   // Extend an already-rendered bubble with a bubble-divider and new content.

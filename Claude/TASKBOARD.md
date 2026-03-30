@@ -5,8 +5,16 @@
 
 ## Backlog
 
+### Bugs & Polish
+- [ ] Rebuild content blocks — посыпались после изменений мёржа (проверить process.js + блоки)
+- [ ] LOD: true virtual scrolling — unload DOM nodes >3 screens, reload on demand (placeholder heights)
+- [ ] Progress bar: block-index based (current block / total blocks), not scroll position %
+- [ ] Dialogue detection: comma+lowercase = attribution (partial fix done); deep fix needs formatter preprocessing or explicit markup; Я-false-positive unavoidable without NLP
+- [ ] Formatter: Zaveta -text cleanup → normalize to `- Text` standard form
+
 ### Content & Navigation
 - [x] LOD content loading — lazy load blocks to avoid browser lag on large texts
+- [ ] Sticky author avatars during scroll within a bubble group
 - [ ] Content deduplication in processing pipeline
 - [ ] Scene timeline
 - [ ] Search filters by context (text / characters / comments)

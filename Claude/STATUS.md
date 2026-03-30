@@ -5,14 +5,19 @@ Last updated: 2026-03-31
 ## Currently Working
 Nothing active.
 
+## Known Issues (backlog)
+- Content blocks need rebuild check (посыпались)
+- LOD needs true virtual scrolling (unload far DOM)
+- Progress bar counts scroll %, should be block-index based
+
 ## Recent Completions
+- LOD cross-batch divider merge (leading + trailing; _extendLastBubble)
+- Dialogue detection rewrite: Zaveta (-text), Tars (- after ^|[,.!?])
+- Dialogue color --dialogue: #d4c49a; divider contrast raised
+- char-link border contrast: --text-muted
+- CLAUDE.md: commit message rule added
 - LOD content loading (batch=5 blocks, margin=3 screens ahead)
 - *** divider merging into single bubble with bubble-divider inside
-- Character list "вернуться к тексту" link fixed (index.html → reader.html)
-- Session logging infrastructure (TASKBOARD, STATUS, sessions/)
-- Search index: O(n) linear scan -> inverted index (2-4 char substrings)
-- Bubble hover tooltip (desktop, pointer:fine)
-- Dead code removal: wrapNames(), parser.js
 
 ## Blockers
 None.
