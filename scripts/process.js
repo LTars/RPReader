@@ -81,7 +81,7 @@ function linkCharacters(text, charData) {
 
   // построить один regex из всех токенов
   const escaped = tokens.map(t => escapeRegex(t.text));
-  const combinedRx = new RegExp(`(${escaped.join('|')})`, 'g');
+  const combinedRx = new RegExp(`(?<![а-яёА-ЯЁa-zA-Z])(${escaped.join('|')})(?![а-яёА-ЯЁa-zA-Z])`, 'g');
 
   // токен-лукап
   const tokenMap = {};

@@ -77,33 +77,8 @@
     "unresolved": false
   },
   {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
-  },
-  {
     "characterId": "wei-wuxian",
     "text": "Вэй Усьянь"
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
   },
   {
     "characterId": "jin-baoshan",
@@ -209,13 +184,9 @@
     "unresolved": false
   },
   {
-    "characterId": "mo-xuanyu",
-    "text": "Мо",
+    "characterId": "jin-baoshan",
+    "text": "Цзинь",
     "unresolved": false
-  },
-  {
-    "characterId": "jin-fan",
-    "text": "Цзинь Фан"
   },
   {
     "characterId": null,
@@ -227,14 +198,9 @@
     "text": "Лань Ванцзи"
   },
   {
-    "characterId": "jin-fan",
+    "characterId": "jin-baoshan",
     "text": "Цзинь",
     "unresolved": false
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
   },
   {
     "characterId": null,
@@ -333,8 +299,9 @@
     "text": "Цзинь Сю"
   },
   {
-    "characterId": "jin-fan",
-    "text": "Цзинь Фан"
+    "characterId": "jin-xiu",
+    "text": "Цзинь",
+    "unresolved": false
   },
   {
     "characterId": "lan-wangji",
@@ -400,11 +367,6 @@
     "unresolved": true
   },
   {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
-  },
-  {
     "characterId": "lan-wangji",
     "text": "Лань",
     "unresolved": false
@@ -418,11 +380,6 @@
     "characterId": "lan-wangji",
     "text": "Лань",
     "unresolved": false
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
   },
   {
     "characterId": "wen-chao",
@@ -449,11 +406,6 @@
     "unresolved": false
   },
   {
-    "characterId": "mo-xuanyu",
-    "text": "Мо",
-    "unresolved": false
-  },
-  {
     "characterId": "jin-baoshan",
     "text": "Баошань"
   },
@@ -583,8 +535,9 @@
     "text": "Баошань"
   },
   {
-    "characterId": "jin-fan",
-    "text": "Цзинь Фан"
+    "characterId": "jin-baoshan",
+    "text": "Цзинь",
+    "unresolved": false
   },
   {
     "characterId": "lan-wangji",
@@ -607,8 +560,9 @@
     "text": "Цзинь Мэй"
   },
   {
-    "characterId": "jin-fan",
-    "text": "Цзинь Фан"
+    "characterId": "jin-mei",
+    "text": "Цзинь",
+    "unresolved": false
   },
   {
     "characterId": "jin-hua",
@@ -692,8 +646,9 @@
     "unresolved": false
   },
   {
-    "characterId": "jin-fan",
-    "text": "Цзинь Фан"
+    "characterId": "jin-baoshan",
+    "text": "Цзинь",
+    "unresolved": false
   },
   {
     "characterId": "lan-wangji",
@@ -773,16 +728,6 @@
     "unresolved": false
   },
   {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
-  },
-  {
     "characterId": "jin-baoshan",
     "text": "Цзинь",
     "unresolved": false
@@ -791,11 +736,6 @@
     "characterId": "lan-wangji",
     "text": "Лань",
     "unresolved": false
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
   },
   {
     "characterId": "mo-xuanyu",
@@ -811,11 +751,6 @@
     "characterId": "lan-wangji",
     "text": "Лань",
     "unresolved": false
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
   },
   {
     "characterId": "jin-baoshan",
@@ -968,11 +903,6 @@
     "text": "Цзинь Вэй"
   },
   {
-    "characterId": "lan-wangji",
-    "text": "Лань",
-    "unresolved": false
-  },
-  {
     "characterId": "jin-wei",
     "text": "Цзинь",
     "unresolved": false
@@ -1001,11 +931,6 @@
   {
     "characterId": "jin-baoshan",
     "text": "Баошань"
-  },
-  {
-    "characterId": "lan-wangji",
-    "text": "Лань",
-    "unresolved": false
   },
   {
     "characterId": "jin-baoshan",
@@ -1062,31 +987,6 @@
     "unresolved": false
   },
   {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
-  },
-  {
-    "characterId": "mo-xuanyu",
-    "text": "Мо",
-    "unresolved": false
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
-  },
-  {
-    "characterId": "mo-xuanyu",
-    "text": "Мо",
-    "unresolved": false
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
-  },
-  {
     "characterId": "mo-xuanyu",
     "text": "Мо",
     "unresolved": false
@@ -1099,11 +999,6 @@
   {
     "characterId": "jin-baoshan",
     "text": "Баошань"
-  },
-  {
-    "characterId": null,
-    "text": "Не",
-    "unresolved": true
   },
   {
     "characterId": "lan-wangji",
@@ -1167,11 +1062,6 @@
     "text": "Лань Хэнцин"
   },
   {
-    "characterId": "wei-wuxian",
-    "text": "Вэй",
-    "unresolved": false
-  },
-  {
     "characterId": "jin-baoshan",
     "text": "Цзинь",
     "unresolved": false
@@ -1181,11 +1071,12 @@
     "text": "Лань Ванцзи"
   },
   {
-    "characterId": "jin-fan",
-    "text": "Цзинь Фан"
+    "characterId": "jin-baoshan",
+    "text": "Цзинь",
+    "unresolved": false
   },
   {
-    "characterId": "jin-fan",
+    "characterId": "jin-baoshan",
     "text": "Цзинь",
     "unresolved": false
   },
@@ -1195,7 +1086,7 @@
     "unresolved": false
   },
   {
-    "characterId": "jin-fan",
+    "characterId": "jin-baoshan",
     "text": "Цзинь",
     "unresolved": false
   },

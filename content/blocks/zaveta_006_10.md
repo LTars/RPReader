@@ -9,7 +9,7 @@ datetime: 3/18/2026 4:53 AM
 <a href="character.html?id=lan-wangji" class="char-link" data-char-id="lan-wangji">Ханьгуан-цзюнь</a> вступил в бой, и его меч сверкал в лунном свете, как молния, как сама справедливость, явившаяся покарать тварь.
 
 <a href="character.html?id=jin-baoshan" class="char-link" data-char-id="jin-baoshan">Баошань</a> стояла на опушке тяжело дыша и не зная, что делать. 
-бежать за <a href="character.html?id=mo-xuanyu" class="char-link" data-char-id="mo-xuanyu">Мо</a> Сюаньюем? помогать полумертвому <a href="character.html?id=jin-fan" class="char-link" data-char-id="jin-fan">Цзинь Фан</a>у? 
+бежать за <a href="character.html?id=mo-xuanyu" class="char-link" data-char-id="mo-xuanyu">Мо</a> Сюаньюем? помогать полумертвому <a href="character.html?id=jin-baoshan" class="char-link" data-char-id="jin-baoshan">Цзинь</a> Фану? 
 звать на помощь, как наказал второй нефрит Гусу <a href="character.html?id=lan-wangji" class="char-link" data-char-id="lan-wangji">Лань</a>?
 
 кулон на шее метался между жаром и холодом, словно не мог определить, что сейчас важнее. <a href="character.html?id=jin-baoshan" class="char-link" data-char-id="jin-baoshan">Баошань</a> сжала его пальцами, чувствуя, как бьётся сердце, и не могла сделать выбор.

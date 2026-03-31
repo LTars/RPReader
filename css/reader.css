@@ -134,9 +134,8 @@
     .bubble {
       background: var(--bubble-right);
       border-bottom-right-radius: 4px;
+      margin-left: auto;
     }
-
-    .bubbles { align-items: flex-end; }
   }
 
   &.left .bubble {
@@ -160,6 +159,7 @@
 }
 
 .message-row {
+  width: 100%;
   margin-bottom: 2px;
 }
 
