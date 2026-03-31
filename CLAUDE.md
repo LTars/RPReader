@@ -160,8 +160,19 @@ Claude/                   — workflow definitions and agent roles
 ## Files
 - `.css` — edit directly, per-page files + common
 - `.html` — can edit, no inline styles or scripts
-- `content/*.md` — authored text, do not modify content
 - `data/*.json` — configuration, can edit
+
+## Content Protection (HARD RULE)
+
+**`content/` files are NEVER modified by Claude. No exceptions.**
+
+- `content/main.md` — intake only; written by the user, cleared by `scripts/process.js`
+- `content/blocks/*.md` — generated output; touched only by `scripts/process.js`
+- `content/blocks/index.json` — generated index; touched only by `scripts/process.js`
+
+These files must not be created, edited, deleted, or overwritten in any task — including bug fixes, refactoring, or "cleanup". If a task seems to require touching content files, stop and ask the user.
+
+The only correct way to update content is: user pastes into `main.md` → runs `node scripts/process.js`.
 
 ## Workflow (Git & Deployment)
 - Version control: Git via bash

@@ -383,4 +383,8 @@ function main() {
   }
 }
 
-main();
+export { parseSegments, groupByAuthor, splitGroup, cleanup, linkCharacters, escapeRegex };
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main();
+}
