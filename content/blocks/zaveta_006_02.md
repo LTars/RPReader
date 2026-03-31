@@ -14,7 +14,7 @@ datetime: 3/18/2026 4:53 AM
 
 -не обращайте внимания.
 
-но пурпурный камень на шее никак не остывал, <a href="character.html?id=jin-baoshan" class="char-link" data-char-id="jin-baoshan">Баошань</a> злилась на всех присутствующих не меньше, чем на <a href="character.html?id=mo-xuanyu" class="char-link" data-char-id="mo-xuanyu">Мо</a> Сюаньюя.
+но пурпурный камень на шее никак не остывал, <a href="character.html?id=jin-baoshan" class="char-link" data-char-id="jin-baoshan">Баошань</a> злилась на всех присутствующих не меньше, чем на <a href="character.html?id=mo-xuanyu" class="char-link" data-char-id="mo-xuanyu">Мо Сюаньюя</a>.
 
 и тут…
 события завертелись с пугающей быстротой, не оставляя времени на размышления о наглых сумасшедших и их дурацких намёках.

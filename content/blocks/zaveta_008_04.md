@@ -9,7 +9,7 @@ datetime: 3/19/2026 12:45 AM
 
 <a href="character.html?id=jin-baoshan" class="char-link" data-char-id="jin-baoshan">Баошань</a> замерла, забыв о мече, забыв о руке, забыв обо всём. она наблюдала, как <a href="character.html?id=mo-xuanyu" class="char-link" data-char-id="mo-xuanyu">Мо Сюаньюй</a> уворачивается от твари, как свистит в листок, как кровь капает с его лица на землю, и чувствовала, как внутри неё поднимается что-то странное. что-то, чему она не могла подобрать названия.
 
-а потом Ванцзи вылетел на поляну и бросил <a href="character.html?id=mo-xuanyu" class="char-link" data-char-id="mo-xuanyu">Мо</a> Сюаньюю флейту.
+а потом Ванцзи вылетел на поляну и бросил <a href="character.html?id=mo-xuanyu" class="char-link" data-char-id="mo-xuanyu">Мо Сюаньюю</a> флейту.
 
 кривую, неловкую, с трещиной вдоль корпуса и застрявшим в ней листком. 
 но <a href="character.html?id=mo-xuanyu" class="char-link" data-char-id="mo-xuanyu">Мо Сюаньюй</a> поймал её так, будто всю жизнь только и делал, что ловил флейты в темноте, и прижал к губам. листок опустился на землю, а флейта запела.

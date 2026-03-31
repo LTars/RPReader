@@ -271,7 +271,7 @@
 
 /* ── tooltip ── */
 .char-tooltip {
-  position: fixed;
+  position: absolute;
   z-index: 500;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
@@ -283,7 +283,7 @@
   pointer-events: none;
   opacity: 0;
   transform: translateY(4px);
-  transition: opacity 0.15s, transform 0.15s;
+  transition: opacity 0.4s ease, transform 0.4s ease;
   font-family: var(--font-ui);
   display: flex;
   align-items: center;

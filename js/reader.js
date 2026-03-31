@@ -225,15 +225,29 @@ class Reader {
       }
       const parts = [block.content];
       let j = i + 1;
-      while (
-        j < blocks.length - 1 &&
-        blocks[j].type === 'divider' &&
-        blocks[j + 1].type === 'message' &&
-        blocks[j + 1].authorId === block.authorId
-      ) {
-        parts.push('***');
-        parts.push(blocks[j + 1].content);
-        j += 2;
+      while (true) {
+        if (
+          j < blocks.length &&
+          blocks[j].type === 'message' &&
+          blocks[j].authorId === block.authorId &&
+          blocks[j].side === block.side
+        ) {
+          parts.push(blocks[j].content);
+          j++;
+          continue;
+        }
+        if (
+          j < blocks.length - 1 &&
+          blocks[j].type === 'divider' &&
+          blocks[j + 1].type === 'message' &&
+          blocks[j + 1].authorId === block.authorId
+        ) {
+          parts.push('***');
+          parts.push(blocks[j + 1].content);
+          j += 2;
+          continue;
+        }
+        break;
       }
       result.push(parts.length > 1 ? { ...block, content: parts.join('\n') } : block);
       i = j;
@@ -389,7 +403,8 @@ class Reader {
     }
   }
 
-  // merge [msg_A, divider, msg_A, ...] chains; trailing dividers deferred as _pendingDivider
+  // merge same-author consecutive messages (size-splits) and [msg_A, divider, msg_A, ...] chains;
+  // trailing dividers deferred as _pendingDivider
   _mergeBlocks(blocks) {
     const result = [];
     let i = 0;
@@ -407,15 +422,31 @@ class Reader {
       const parts = [block.content];
       let j = i + 1;
 
-      while (
-        j < blocks.length - 1 &&
-        blocks[j].type === 'divider' &&
-        blocks[j + 1].type === 'message' &&
-        blocks[j + 1].authorId === block.authorId
-      ) {
-        parts.push('***');
-        parts.push(blocks[j + 1].content);
-        j += 2;
+      while (true) {
+        // consecutive same-author message (size-split): merge without divider marker
+        if (
+          j < blocks.length &&
+          blocks[j].type === 'message' &&
+          blocks[j].authorId === block.authorId &&
+          blocks[j].side === block.side
+        ) {
+          parts.push(blocks[j].content);
+          j++;
+          continue;
+        }
+        // msg-divider-msg chain: stop one before end to allow trailing-divider pending logic
+        if (
+          j < blocks.length - 1 &&
+          blocks[j].type === 'divider' &&
+          blocks[j + 1].type === 'message' &&
+          blocks[j + 1].authorId === block.authorId
+        ) {
+          parts.push('***');
+          parts.push(blocks[j + 1].content);
+          j += 2;
+          continue;
+        }
+        break;
       }
 
       const merged = parts.length > 1

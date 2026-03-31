@@ -19,7 +19,7 @@ datetime: 3/19/2026 12:45 AM
 
 раздался знакомый голос, и в нём слышались извиняющиеся нотки, но ни капли раскаяния.
 
-<a href="character.html?id=jin-baoshan" class="char-link" data-char-id="jin-baoshan">Баошань</a> распахнула глаза, и сквозь дым увидела перед собой <a href="character.html?id=mo-xuanyu" class="char-link" data-char-id="mo-xuanyu">Мо</a> Сюаньюя. его руки всё ещё лежали на её груди, там, чуть ниже кулона, там, где было мягче всего. 
+<a href="character.html?id=jin-baoshan" class="char-link" data-char-id="jin-baoshan">Баошань</a> распахнула глаза, и сквозь дым увидела перед собой <a href="character.html?id=mo-xuanyu" class="char-link" data-char-id="mo-xuanyu">Мо Сюаньюя</a>. его руки всё ещё лежали на её груди, там, чуть ниже кулона, там, где было мягче всего. 
 он отдёрнул их моментально, развернулся и явно собирался броситься наутёк.
 
 но не успел.

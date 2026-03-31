@@ -172,14 +172,16 @@ export class Characters {
 
     const rect = el.getBoundingClientRect();
     const isBubble = el.classList.contains('bubble');
-    let x = Math.min(rect.left, window.innerWidth - 270);
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const x = Math.min(scrollX + rect.left, scrollX + window.innerWidth - 270);
     let y;
 
     if (isBubble) {
-      y = rect.top - 10;
+      y = scrollY + rect.top - 10;
       this._tooltip.classList.add('above');
     } else {
-      y = rect.bottom + 8;
+      y = scrollY + rect.bottom + 8;
       this._tooltip.classList.remove('above');
     }
 

@@ -184,9 +184,8 @@
     "unresolved": false
   },
   {
-    "characterId": "jin-baoshan",
-    "text": "Цзинь",
-    "unresolved": false
+    "characterId": "jin-fan",
+    "text": "Цзинь Фана"
   },
   {
     "characterId": null,
@@ -198,7 +197,7 @@
     "text": "Лань Ванцзи"
   },
   {
-    "characterId": "jin-baoshan",
+    "characterId": "jin-fan",
     "text": "Цзинь",
     "unresolved": false
   },
@@ -299,9 +298,8 @@
     "text": "Цзинь Сю"
   },
   {
-    "characterId": "jin-xiu",
-    "text": "Цзинь",
-    "unresolved": false
+    "characterId": "jin-fan",
+    "text": "Цзинь Фане"
   },
   {
     "characterId": "lan-wangji",
@@ -392,8 +390,7 @@
   },
   {
     "characterId": "mo-xuanyu",
-    "text": "Мо",
-    "unresolved": false
+    "text": "Мо Сюаньюя"
   },
   {
     "characterId": "lan-wangji",
@@ -463,8 +460,7 @@
   },
   {
     "characterId": "mo-xuanyu",
-    "text": "Мо",
-    "unresolved": false
+    "text": "Мо Сюаньюя"
   },
   {
     "characterId": "jin-fan",
@@ -535,9 +531,8 @@
     "text": "Баошань"
   },
   {
-    "characterId": "jin-baoshan",
-    "text": "Цзинь",
-    "unresolved": false
+    "characterId": "jin-fan",
+    "text": "Цзинь Фану"
   },
   {
     "characterId": "lan-wangji",
@@ -560,9 +555,8 @@
     "text": "Цзинь Мэй"
   },
   {
-    "characterId": "jin-mei",
-    "text": "Цзинь",
-    "unresolved": false
+    "characterId": "jin-fan",
+    "text": "Цзинь Фана"
   },
   {
     "characterId": "jin-hua",
@@ -642,13 +636,11 @@
   },
   {
     "characterId": "mo-xuanyu",
-    "text": "Мо",
-    "unresolved": false
+    "text": "Мо Сюаньюем"
   },
   {
-    "characterId": "jin-baoshan",
-    "text": "Цзинь",
-    "unresolved": false
+    "characterId": "jin-fan",
+    "text": "Цзинь Фану"
   },
   {
     "characterId": "lan-wangji",
@@ -787,8 +779,7 @@
   },
   {
     "characterId": "mo-xuanyu",
-    "text": "Мо",
-    "unresolved": false
+    "text": "Мо Сюаньюя"
   },
   {
     "characterId": "wen-chao",
@@ -838,8 +829,7 @@
   },
   {
     "characterId": "mo-xuanyu",
-    "text": "Мо",
-    "unresolved": false
+    "text": "Мо Сюаньюю"
   },
   {
     "characterId": "mo-xuanyu",
@@ -875,8 +865,7 @@
   },
   {
     "characterId": "mo-xuanyu",
-    "text": "Мо",
-    "unresolved": false
+    "text": "Мо Сюаньюя"
   },
   {
     "characterId": "jin-baoshan",
@@ -977,9 +966,8 @@
     "text": "Мо Сюаньюй"
   },
   {
-    "characterId": "lan-wangji",
-    "text": "Лань",
-    "unresolved": false
+    "characterId": "lan-qiren",
+    "text": "Лань Цижэня"
   },
   {
     "characterId": "jin-baoshan",
@@ -993,8 +981,7 @@
   },
   {
     "characterId": "mo-xuanyu",
-    "text": "Мо",
-    "unresolved": false
+    "text": "Мо Сюаньюя"
   },
   {
     "characterId": "jin-baoshan",
@@ -1002,8 +989,7 @@
   },
   {
     "characterId": "lan-wangji",
-    "text": "Лань",
-    "unresolved": false
+    "text": "Лань Чжаня"
   },
   {
     "characterId": "mo-xuanyu",
@@ -1071,22 +1057,20 @@
     "text": "Лань Ванцзи"
   },
   {
-    "characterId": "jin-baoshan",
-    "text": "Цзинь",
-    "unresolved": false
+    "characterId": "jin-fan",
+    "text": "Цзинь Фана"
   },
   {
-    "characterId": "jin-baoshan",
+    "characterId": "jin-fan",
     "text": "Цзинь",
     "unresolved": false
   },
   {
     "characterId": "lan-wangji",
-    "text": "Лань",
-    "unresolved": false
+    "text": "Лань Чжаня"
   },
   {
-    "characterId": "jin-baoshan",
+    "characterId": "jin-fan",
     "text": "Цзинь",
     "unresolved": false
   },
