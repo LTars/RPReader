@@ -76,6 +76,7 @@ class Reader {
       this._loadAuthors(),
     ]);
     await this._loadContent();
+    this._initVirtObserver();
     this._render();
     this._bindUI();
     this._updateProgress();
@@ -126,6 +127,7 @@ class Reader {
 
     this.characters.checkReturnHighlight();
     this.search = new Search(this.blocks);
+    this._virtObserver.observe(page.el);
 
     if (this._loadedCount < this._filenames.length) {
       this._setupLOD(chat);
@@ -135,7 +137,6 @@ class Reader {
         this._pendingDivider        = null;
         this._pendingDividerAuthorId = null;
       }
-      this._setupVirtObserver();
     }
   }
 
@@ -151,9 +152,9 @@ class Reader {
     return page;
   }
 
-  // Activates virtual scrolling after all LOD batches are loaded.
-  _setupVirtObserver() {
-    if (this._virtObserver) this._virtObserver.disconnect();
+  // Creates the persistent virt-scroll observer. Each page is observed
+  // immediately after it's appended to the DOM, not after all LOD is done.
+  _initVirtObserver() {
     const margin = Math.round(window.innerHeight * VIRT_UNLOAD_SCREENS);
     this._virtObserver = new IntersectionObserver(
       entries => {
@@ -170,9 +171,6 @@ class Reader {
       },
       { rootMargin: `${margin}px` }
     );
-    for (const page of this._virtPages) {
-      this._virtObserver.observe(page.el);
-    }
   }
 
   _unloadVirtPage(page) {
@@ -342,6 +340,7 @@ class Reader {
     this.characters.bindBubbles(fragment);
     page.el.appendChild(fragment);
     chat.appendChild(page.el);
+    this._virtObserver.observe(page.el);
 
     this.search = new Search(this.blocks);
 
@@ -365,9 +364,6 @@ class Reader {
     this._lodSentinel?.remove();
     this._lodObserver = null;
     this._lodSentinel = null;
-
-    // all content loaded — activate virtual scrolling
-    this._setupVirtObserver();
   }
 
   _renderBlocks(blocks, container) {
