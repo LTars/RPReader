@@ -9,7 +9,7 @@ const MAIN_PATH = join(ROOT, 'content', 'main.md');
 const BLOCKS_DIR = join(ROOT, 'content', 'blocks');
 const CHARACTERS_PATH = join(ROOT, 'data', 'characters', 'index.json');
 const RULES_PATH = join(ROOT, 'data', 'parser-rules.json');
-const APPEARANCES_PATH = join(ROOT, 'data', 'character-appearances.json');
+const APPEARANCES_PATH = join(ROOT, 'content', 'character-appearances.json');
 
 // ── Header pattern ──────────────────────────────────────
 // [3/17/2026 2:52 AM] Author: text...
@@ -48,10 +48,10 @@ function loadAuthors() {
   return map;
 }
 
-function getNextIndex(authorId) {
+function getNextRawIndex() {
   if (!existsSync(BLOCKS_DIR)) return 0;
   const files = readdirSync(BLOCKS_DIR);
-  const rx = new RegExp(`^${authorId}_(\\d+)\\.md$`);
+  const rx = /_(\d+)_\d+\.md$/;
   let max = -1;
   for (const f of files) {
     const m = f.match(rx);
@@ -277,9 +277,10 @@ function cleanup(text) {
 }
 
 // ── Writer ──────────────────────────────────────────────
-function writeBlock(authorId, side, datetime, content, index) {
-  const pad = String(index).padStart(2, '0');
-  const filename = `${authorId}_${pad}.md`;
+function writeBlock(authorId, side, datetime, content, rawIdx, splitIdx) {
+  const raw   = String(rawIdx).padStart(3, '0');
+  const split = String(splitIdx).padStart(2, '0');
+  const filename = `${authorId}_${raw}_${split}.md`;
   const filepath = join(BLOCKS_DIR, filename);
 
   let frontmatter = '---\n';
@@ -293,9 +294,10 @@ function writeBlock(authorId, side, datetime, content, index) {
   return filename;
 }
 
-function writeDivider(authorId, index) {
-  const pad = String(index).padStart(2, '0');
-  const filename = `${authorId}_${pad}.md`;
+function writeDivider(authorId, rawIdx, splitIdx) {
+  const raw   = String(rawIdx).padStart(3, '0');
+  const split = String(splitIdx).padStart(2, '0');
+  const filename = `${authorId}_${raw}_${split}.md`;
   const filepath = join(BLOCKS_DIR, filename);
 
   writeFileSync(filepath, '---\ntype: divider\n---\n', 'utf-8');
@@ -329,9 +331,7 @@ function main() {
   const segments = parseSegments(linked);
   const groups = groupByAuthor(segments);
 
-  // счетчики индексов по авторам
-  const counters = {};
-
+  let rawCounter = getNextRawIndex();
   const written = [];
 
   for (const group of groups) {
@@ -339,15 +339,12 @@ function main() {
     const authorId = author?.id || group.authorKey || 'unknown';
     const side = author?.defaultSide || 'right';
 
-    if (!(authorId in counters)) {
-      counters[authorId] = getNextIndex(authorId);
-    }
-
     const blocks = splitGroup(group);
+    let splitIdx = 0;
 
     for (const block of blocks) {
       if (block.type === 'divider') {
-        const fname = writeDivider(authorId, counters[authorId]++);
+        const fname = writeDivider(authorId, rawCounter, splitIdx++);
         written.push(fname);
         continue;
       }
@@ -355,9 +352,11 @@ function main() {
       const content = cleanup(block.lines.join('\n'));
       if (!content) continue;
 
-      const fname = writeBlock(authorId, side, block.datetime, content, counters[authorId]++);
+      const fname = writeBlock(authorId, side, block.datetime, content, rawCounter, splitIdx++);
       written.push(fname);
     }
+
+    rawCounter++;
   }
 
   // обновить index.json блоков

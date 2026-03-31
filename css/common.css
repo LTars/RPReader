@@ -55,3 +55,83 @@ body {
   display: flex;
   min-height: 100vh;
 }
+
+/* ── left panel ── */
+.panel {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: var(--panel-width);
+  background: var(--bg-elevated);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  gap: 8px;
+  z-index: 100;
+  transition: width var(--transition);
+  overflow: hidden;
+
+  &.expanded {
+    width: var(--panel-expanded);
+    align-items: flex-start;
+    padding: 16px 12px;
+  }
+}
+
+.panel-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  text-decoration: none;
+
+  svg { width: 18px; height: 18px; }
+
+  &:hover {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  &.active {
+    background: var(--accent-glow);
+    color: var(--accent);
+  }
+}
+
+/* ── main content area ── */
+.main {
+  margin-left: var(--panel-width);
+  flex: 1;
+  padding: 40px 20px 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: margin-left var(--transition);
+}
+
+@media (max-width: 768px) {
+  .main { padding: 20px 12px 80px; }
+
+  .panel {
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    height: var(--panel-width);
+    flex-direction: row;
+    justify-content: space-around;
+    border-right: none;
+    border-top: 1px solid var(--border-subtle);
+    padding: 0 16px;
+  }
+}

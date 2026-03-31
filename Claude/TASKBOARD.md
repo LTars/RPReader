@@ -5,12 +5,23 @@
 
 ## Backlog
 
+### Structure Reorg (next session)
+- [ ] Move HTML pages to pages/ dir — only index.html stays in root (+ tool config files)
+- [ ] Rename js/characters.js and js/character.js — clarify naming (e.g. char-manager/char-page or similar, TBD next session)
+- [ ] Block naming: change scheme to `author_<global_raw_idx>_<split_part>` (e.g. tars_003_1.md) — requires reprocessing all blocks
+- [ ] Block splitting: cut large blocks to ~1 screen size, invisibly — same visual bubble (no UI divider), split only in content/data; enables true pagination
+- [ ] Page index markers: background labels showing "screen/page N" at each block boundary
+- [ ] Search: add search-by-page-number alongside full-text search
+- [ ] Progress bar: rewrite to total-content-based (loaded blocks / total blocks × their estimated height), not scroll-% of current DOM
+
 ### Bugs & Polish
+- [x] Fix right bubble alignment (regression from sticky avatar)
+- [x] Fix avatar under status bar (bottom: 36px / mobile calc)
 - [ ] Rebuild content blocks — посыпались после изменений мёржа (проверить process.js + блоки)
 - [ ] LOD: true virtual scrolling — unload DOM nodes >3 screens, reload on demand (placeholder heights)
-- [ ] Progress bar: block-index based (current block / total blocks), not scroll position %
 - [ ] Dialogue detection: comma+lowercase = attribution (partial fix done); deep fix needs formatter preprocessing or explicit markup; Я-false-positive unavoidable without NLP
 - [ ] Formatter: Zaveta -text cleanup → normalize to `- Text` standard form
+- [x] Clean up project structure (CLAUDE.md outdated — parser.js deleted, scripts/ added)
 
 ### Content & Navigation
 - [x] LOD content loading — lazy load blocks to avoid browser lag on large texts
