@@ -1,15 +1,18 @@
-import { readFileSync, writeFileSync, readdirSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { readFileSync, writeFileSync, readdirSync, existsSync, unlinkSync } from 'fs';
+import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
-const MAIN_PATH = join(ROOT, 'content', 'main.md');
-const BLOCKS_DIR = join(ROOT, 'content', 'blocks');
+const MAIN_PATH       = join(ROOT, 'content', 'main.md');
+const BLOCKS_DIR      = join(ROOT, 'content', 'blocks');
 const CHARACTERS_PATH = join(ROOT, 'data', 'characters', 'index.json');
-const RULES_PATH = join(ROOT, 'data', 'parser-rules.json');
+const RULES_PATH      = join(ROOT, 'data', 'parser-rules.json');
 const APPEARANCES_PATH = join(ROOT, 'content', 'character-appearances.json');
+
+// ~3 phone screens of text (~667px tall, ~22 lines/screen, ~40 chars/line)
+const MAX_BLOCK_CHARS = 2000;
 
 // ── Header pattern ──────────────────────────────────────
 // [3/17/2026 2:52 AM] Author: text...
@@ -48,16 +51,14 @@ function loadAuthors() {
   return map;
 }
 
-function getNextRawIndex() {
-  if (!existsSync(BLOCKS_DIR)) return 0;
-  const files = readdirSync(BLOCKS_DIR);
-  const rx = /_(\d+)_\d+\.md$/;
-  let max = -1;
-  for (const f of files) {
-    const m = f.match(rx);
-    if (m) max = Math.max(max, parseInt(m[1], 10));
+// ── Block cleanup ────────────────────────────────────────
+function clearBlocks() {
+  if (!existsSync(BLOCKS_DIR)) return;
+  for (const f of readdirSync(BLOCKS_DIR)) {
+    if (f.endsWith('.md') || f === 'index.json') {
+      unlinkSync(join(BLOCKS_DIR, f));
+    }
   }
-  return max + 1;
 }
 
 // ── Character linker ────────────────────────────────────
@@ -89,11 +90,6 @@ function linkCharacters(text, charData) {
   }
 
   // линейный проход
-  let result = '';
-  let lastIndex = 0;
-
-  // нельзя просто replaceAll - нужен порядковый проход для lastSeen
-  // разобьем текст на строки, обработаем каждую
   const lines = text.split('\n');
   const linkedLines = [];
 
@@ -276,6 +272,59 @@ function cleanup(text) {
   return text.replace(/\n{3,}/g, '\n\n').trim();
 }
 
+// ── Size-based splitting ─────────────────────────────────
+// Splits content into chunks of at most maxChars, respecting paragraph
+// boundaries first, then sentence boundaries. Rolls back to the nearest
+// boundary before the limit.
+function splitBySize(content, maxChars) {
+  if (content.length <= maxChars) return [content];
+
+  const paragraphs = content.split(/\n\n+/);
+  const chunks = [];
+  let current = '';
+
+  for (const para of paragraphs) {
+    const candidate = current ? current + '\n\n' + para : para;
+    if (candidate.length > maxChars && current) {
+      chunks.push(current);
+      current = para;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) chunks.push(current);
+
+  // paragraph splits not enough — fall back to sentence splits within oversized chunks
+  const result = [];
+  for (const chunk of chunks) {
+    if (chunk.length <= maxChars) {
+      result.push(chunk);
+    } else {
+      result.push(...splitBySentence(chunk, maxChars));
+    }
+  }
+  return result;
+}
+
+function splitBySentence(text, maxChars) {
+  // split at sentence endings: . ! ? … followed by whitespace
+  const parts = text.split(/(?<=[.!?…])\s+/);
+  const chunks = [];
+  let current = '';
+
+  for (const part of parts) {
+    const candidate = current ? current + ' ' + part : part;
+    if (candidate.length > maxChars && current) {
+      chunks.push(current);
+      current = part;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks.length ? chunks : [text];
+}
+
 // ── Writer ──────────────────────────────────────────────
 function writeBlock(authorId, side, datetime, content, rawIdx, splitIdx) {
   const raw   = String(rawIdx).padStart(3, '0');
@@ -306,19 +355,24 @@ function writeDivider(authorId, rawIdx, splitIdx) {
 
 // ── Main ────────────────────────────────────────────────
 function main() {
-  // прочитать main.md
-  if (!existsSync(MAIN_PATH)) {
-    console.log('main.md not found');
+  const inputPath = process.argv[2] ? resolve(process.argv[2]) : MAIN_PATH;
+  const isDefaultInput = inputPath === MAIN_PATH;
+
+  if (!existsSync(inputPath)) {
+    console.log(`Input file not found: ${inputPath}`);
     return;
   }
 
-  let raw = readFileSync(MAIN_PATH, 'utf-8').replace(/\r\n/g, '\n').trim();
+  let raw = readFileSync(inputPath, 'utf-8').replace(/\r\n/g, '\n').trim();
   if (!raw) {
-    console.log('main.md is empty, nothing to process');
+    console.log('Input is empty, nothing to process');
     return;
   }
 
-  console.log(`Processing main.md (${raw.length} chars)...`);
+  console.log(`Processing ${inputPath} (${raw.length} chars)...`);
+
+  // clear all existing blocks and index before full reprocess
+  clearBlocks();
 
   // загрузить данные
   const charData = loadCharacters();
@@ -331,7 +385,7 @@ function main() {
   const segments = parseSegments(linked);
   const groups = groupByAuthor(segments);
 
-  let rawCounter = getNextRawIndex();
+  let rawCounter = 0;
   const written = [];
 
   for (const group of groups) {
@@ -352,25 +406,26 @@ function main() {
       const content = cleanup(block.lines.join('\n'));
       if (!content) continue;
 
-      const fname = writeBlock(authorId, side, block.datetime, content, rawCounter, splitIdx++);
-      written.push(fname);
+      for (const part of splitBySize(content, MAX_BLOCK_CHARS)) {
+        const fname = writeBlock(authorId, side, block.datetime, part, rawCounter, splitIdx++);
+        written.push(fname);
+      }
     }
 
     rawCounter++;
   }
 
-  // обновить index.json блоков
+  // записать новый index.json (полная замена, не append)
   const INDEX_PATH = join(BLOCKS_DIR, 'index.json');
-  const existing = existsSync(INDEX_PATH)
-    ? JSON.parse(readFileSync(INDEX_PATH, 'utf-8'))
-    : [];
-  writeFileSync(INDEX_PATH, JSON.stringify([...existing, ...written], null, 2), 'utf-8');
+  writeFileSync(INDEX_PATH, JSON.stringify(written, null, 2), 'utf-8');
 
   // сохранить appearances
   writeFileSync(APPEARANCES_PATH, JSON.stringify(appearances, null, 2), 'utf-8');
 
-  // очистить main.md
-  writeFileSync(MAIN_PATH, '', 'utf-8');
+  // очистить intake только если читали из main.md
+  if (isDefaultInput) {
+    writeFileSync(MAIN_PATH, '', 'utf-8');
+  }
 
   console.log(`Done. ${written.length} blocks written:`);
   for (const f of written) console.log(`  ${f}`);
@@ -382,7 +437,7 @@ function main() {
   }
 }
 
-export { parseSegments, groupByAuthor, splitGroup, cleanup, linkCharacters, escapeRegex };
+export { parseSegments, groupByAuthor, splitGroup, cleanup, linkCharacters, escapeRegex, splitBySize, splitBySentence };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main();

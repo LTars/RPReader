@@ -90,6 +90,14 @@
   gap: 4px;
 }
 
+/* virtual scrolling page wrapper — flex column matching .chat layout */
+.virt-page {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
 .author-header {
   font-family: var(--font-ui);
   font-size: 11px;

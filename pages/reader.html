@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>читалка</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/reader.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- progress bar -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- left panel -->
+  <nav class="panel" id="panel">
+    <button class="panel-icon" id="panel-toggle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+
+    <a class="panel-icon" id="home-btn" href="../index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+        <path d="M9 21V12h6v9"/>
+      </svg>
+    </a>
+
+    <a class="panel-icon" id="characters-btn" href="character.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        <path d="M21 21v-2a4 4 0 0 0-3-3.85"/>
+      </svg>
+    </a>
+
+    <button class="panel-icon" id="search-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="7"/>
+        <line x1="16.5" y1="16.5" x2="22" y2="22"/>
+      </svg>
+    </button>
+
+    <button class="panel-icon" id="blue-filter-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="2" x2="12" y2="4"/>
+        <line x1="12" y1="20" x2="12" y2="22"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="2" y1="12" x2="4" y2="12"/>
+        <line x1="20" y1="12" x2="22" y2="12"/>
+      </svg>
+    </button>
+  </nav>
+
+  <!-- main content -->
+  <main class="main">
+    <div class="chat" id="chat"></div>
+  </main>
+
+  <!-- character tooltip -->
+  <div class="char-tooltip" id="char-tooltip">
+    <span class="tooltip-avatar" id="tooltip-avatar"></span>
+    <div class="tooltip-info">
+      <div class="tooltip-name"></div>
+      <div class="tooltip-aliases"></div>
+    </div>
+  </div>
+
+  <!-- return focus overlay -->
+  <div class="return-focus-overlay" id="return-focus-overlay"></div>
+
+  <!-- character panel -->
+  <aside class="char-panel" id="char-panel">
+    <div class="char-panel-header">
+      <span class="char-panel-name" id="char-panel-name"></span>
+      <div class="char-panel-close" id="char-panel-close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </div>
+    </div>
+    <div class="char-panel-body" id="char-panel-body">
+      <div class="char-aliases" id="char-panel-aliases"></div>
+      <a class="char-panel-link" id="char-panel-link" href="#">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        <span id="char-panel-link-label"></span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- search overlay -->
+  <div class="search-overlay" id="search-overlay">
+    <div class="search-box">
+      <input type="text" id="search-input">
+      <div class="search-results" id="search-results"></div>
+    </div>
+  </div>
+
+  <!-- status bar -->
+  <div class="status-bar">
+    <div class="status-item">
+      <span id="progress-text"></span>
+    </div>
+    <div class="status-item">
+      <span class="battery-icon">⚡</span>
+      <span id="battery-text"></span>
+    </div>
+  </div>
+
+</div>
+<script type="module" src="../js/reader.js"></script>
+</body>
+</html>
